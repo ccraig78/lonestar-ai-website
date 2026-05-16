@@ -27,7 +27,8 @@ a { color: inherit; }
 .hero h1, .section-heading h2, .package-card h2 { margin: 0; font-size: clamp(2.4rem, 6vw, 5.8rem); line-height: .92; letter-spacing: -.06em; }
 .section-heading h2, .package-card h2 { font-size: clamp(2rem, 4vw, 4rem); color: var(--navy); }
 .hero-lede, .section-heading p, .package-card p { font-size: clamp(1.04rem, 1.5vw, 1.28rem); line-height: 1.62; color: rgba(255,255,255,.78); max-width: 760px; }
-.section-heading p, .package-card p { color: var(--muted); }
+.section-heading p, .package-card p, .package-option p { color: var(--muted); }
+.centered p { margin-left: auto; margin-right: auto; }
 .hero-actions, .bb-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 18px; border-radius: 999px; text-decoration: none; font-weight: 950; border: 1px solid transparent; }
 .btn.primary { background: linear-gradient(135deg, var(--red), #ff665f); color: white; box-shadow: 0 20px 45px rgba(227,52,63,.26); }
@@ -42,21 +43,35 @@ a { color: inherit; }
 .hero-card small { display: block; color: var(--muted); margin-top: 12px; line-height: 1.5; }
 .section-heading { max-width: 920px; }
 .centered { text-align: center; margin-inline: auto; }
-.benefit-grid, .cost-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
-.benefit-grid article, .cost-grid article, .tier-card { background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 24px; box-shadow: 0 16px 45px rgba(7,20,38,.08); }
+.benefit-grid, .cost-grid, .package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+.benefit-grid article, .cost-grid article, .tier-card, .package-option { background: var(--card); border: 1px solid var(--line); border-radius: 26px; padding: 24px; box-shadow: 0 16px 45px rgba(7,20,38,.08); }
 .benefit-grid span { color: var(--red); font-weight: 950; }
 h3 { margin: 8px 0 8px; font-size: 1.35rem; color: var(--navy); }
 p, li { line-height: 1.58; }
-.benefit-grid p, .cost-grid p, .tier-card li { color: var(--muted); }
+.benefit-grid p, .cost-grid p, .tier-card li, .tier-summary, .consult-note { color: var(--muted); }
 .features { background: linear-gradient(180deg, #f6f1e8, #eaf0fb); }
 .feature-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; align-items: stretch; }
 .tier-card { position: relative; overflow: hidden; }
 .tier-card.featured { background: var(--navy); color: white; transform: translateY(-12px); }
-.tier-card.featured h3, .tier-card.featured li { color: white; }
+.tier-card.featured h3, .tier-card.featured li, .tier-card.featured .tier-summary { color: white; }
+.tier-card strong { color: var(--navy); }
+.tier-card.featured strong { color: white; }
+.local-card { border-top: 6px solid var(--red); }
+.tier-summary { margin: 10px 0 16px; font-weight: 700; }
+.consult-note { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); font-weight: 850; }
 .tier { display: inline-flex; margin: 0 0 8px; padding: 7px 10px; border-radius: 999px; background: rgba(22, 105, 216, .12); color: var(--blue); font-weight: 950; }
 .featured .tier { background: rgba(255,255,255,.12); color: white; }
 ul { padding-left: 20px; }
 li { margin: 9px 0; }
+.package-intro { margin-bottom: 8px; }
+.package-option { display: flex; flex-direction: column; }
+.package-option.recommended { border: 2px solid rgba(22,105,216,.38); background: linear-gradient(135deg, #fff, #edf4ff); }
+.package-option h3 { font-size: 1.8rem; margin-top: 0; }
+.price-line { margin: 12px 0 14px; padding: 18px; border-radius: 22px; background: var(--navy); color: white; }
+.price-line strong { display: block; font-size: clamp(2.2rem, 5vw, 3.6rem); letter-spacing: -.06em; line-height: .95; }
+.price-line span { display: block; margin-top: 5px; color: rgba(255,255,255,.72); text-transform: uppercase; letter-spacing: .12em; font-weight: 900; font-size: .76rem; }
+.check-list { margin-top: auto; }
+.check-list li::marker { color: var(--red); }
 .package-card { display: grid; grid-template-columns: 1fr minmax(240px, 340px); gap: 28px; align-items: center; padding: clamp(24px, 5vw, 48px); border-radius: 34px; background: linear-gradient(135deg, #fff, #edf4ff); border: 1px solid var(--line); box-shadow: 0 22px 70px rgba(7,20,38,.1); }
 .price-box { background: var(--navy); color: white; border-radius: 28px; padding: 26px; text-align: center; }
 .price-box span { color: rgba(255,255,255,.72); text-transform: uppercase; letter-spacing: .12em; font-weight: 900; font-size: .76rem; }
@@ -79,7 +94,7 @@ footer strong { color: white; }
   .site-header { position: relative; flex-direction: column; align-items: flex-start; }
   .site-header nav { flex-wrap: wrap; }
   .hero, .package-card { grid-template-columns: 1fr; }
-  .benefit-grid, .feature-columns, .cost-grid, .steps-list { grid-template-columns: 1fr; }
+  .benefit-grid, .feature-columns, .cost-grid, .steps-list, .package-grid { grid-template-columns: 1fr; }
   .tier-card.featured { transform: none; }
 }
 @media (max-width: 560px) {
