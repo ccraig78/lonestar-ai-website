@@ -113,7 +113,7 @@ if (mount) {
       const maxAxis = Math.max(size.x, size.y, size.z) || 1;
 
       object.position.sub(center);
-      object.scale.setScalar(3.15 / maxAxis);
+      object.scale.setScalar(2.75 / maxAxis);
       object.rotation.x = -0.16;
       object.rotation.y = -0.38;
 

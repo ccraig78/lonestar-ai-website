@@ -52,11 +52,13 @@
             <span>AI usage billed separately</span>
           </div>
         </div>
-        <aside class="hero-card model-card" aria-label="LoneStar AI logo and core offer">
-          <div class="logo-viewer static-logo-viewer">
-            <img class="hero-logo-mark" src="assets/images/ls-star-rounded-gradient.svg" alt="LoneStar AI LS star logo" />
+        <aside class="hero-card model-card" aria-label="Interactive LoneStar AI 3D logo and core offer">
+          <div class="logo-viewer" data-logo-viewer>
+            <canvas aria-label="Interactive rotating 3D LoneStar AI logo"></canvas>
+            <img class="hero-logo-mark" data-logo-fallback src="assets/images/ls-star-rounded-gradient.svg" alt="LoneStar AI LS star logo fallback" />
+            <div class="model-status" data-logo-status>Loading 3D logo…</div>
           </div>
-          <p class="model-hint">Official LS/star mark. Use the gradient version whenever possible; use the solid version for vinyl, one-color print, or simpler production needs.</p>
+          <p class="model-hint">Slow auto-rotate. Drag the logo to inspect it; once moved, it stays where you leave it.</p>
           <p class="card-label">Starting Package</p>
           <strong>$497</strong>
           <span>Starter Assistant setup for simple FAQs, business info, and lead capture.</span>
@@ -219,5 +221,6 @@
       <strong>LoneStar AI</strong>
       <span>Custom AI assistants for local businesses in Dallas / Fort Worth.</span>
     </footer>
+    <script type="module" src="assets/js/logo-viewer.js"></script>
   </body>
 </html>
