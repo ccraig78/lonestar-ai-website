@@ -52,8 +52,13 @@
             <span>Add features later</span>
           </div>
         </div>
-        <aside class="hero-card" aria-label="Intro offer">
-          <img src="assets/images/lonestar-trans-star-logo.png" alt="" />
+        <aside class="hero-card model-card" aria-label="Interactive LoneStar AI 3D logo and starter offer">
+          <div class="logo-viewer" data-logo-viewer>
+            <canvas aria-label="Interactive rotating 3D LoneStar AI logo"></canvas>
+            <img data-logo-fallback src="assets/images/lonestar-trans-star-logo.png" alt="LoneStar AI logo fallback" />
+            <div class="model-status" data-logo-status>Loading 3D logo…</div>
+          </div>
+          <p class="model-hint">Slow auto-rotate. Drag the logo to inspect it; once moved, it stays where you leave it.</p>
           <p class="card-label">Starter Setup</p>
           <strong>$500</strong>
           <span>VPS setup + OpenClaw install + one VPS-Beginner feature.</span>
@@ -216,5 +221,6 @@
       <strong>LoneStar AI Assistant Setup</strong>
       <span>Practical AI help for small businesses in Dallas / Fort Worth.</span>
     </footer>
+    <script type="module" src="assets/js/logo-viewer.js"></script>
   </body>
 </html>
