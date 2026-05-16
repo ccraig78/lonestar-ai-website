@@ -1,6 +1,6 @@
 import * as THREE from 'https://esm.sh/three@0.164.1';
 import { OrbitControls } from 'https://esm.sh/three@0.164.1/examples/jsm/controls/OrbitControls.js';
-import { STLLoader } from 'https://esm.sh/three@0.164.1/examples/jsm/loaders/STLLoader.js';
+import { GLTFLoader } from 'https://esm.sh/three@0.164.1/examples/jsm/loaders/GLTFLoader.js';
 
 const mount = document.querySelector('[data-logo-viewer]');
 
@@ -22,17 +22,17 @@ if (mount) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x102040, 1.35));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x102040, 1.45));
 
-  const keyLight = new THREE.DirectionalLight(0xffffff, 2.25);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 2.1);
   keyLight.position.set(4, 5, 6);
   scene.add(keyLight);
 
-  const redRim = new THREE.PointLight(0xe3343f, 2.5, 12);
+  const redRim = new THREE.PointLight(0xe3343f, 2.4, 12);
   redRim.position.set(-3.5, 2.5, 3.5);
   scene.add(redRim);
 
-  const blueRim = new THREE.PointLight(0x1669d8, 2.4, 12);
+  const blueRim = new THREE.PointLight(0x1669d8, 2.35, 12);
   blueRim.position.set(3.8, -1.5, 3.8);
   scene.add(blueRim);
 
@@ -87,42 +87,37 @@ if (mount) {
     if (fallback) fallback.hidden = true;
   };
 
-  const loader = new STLLoader();
+  const loader = new GLTFLoader();
   loader.load(
-    'assets/models/lonestar-logo.stl',
-    (geometry) => {
-      geometry.computeVertexNormals();
-      geometry.center();
-      geometry.computeBoundingBox();
+    'assets/models/lonestar-logo.glb',
+    (gltf) => {
+      const object = gltf.scene;
 
-      const size = new THREE.Vector3();
-      geometry.boundingBox.getSize(size);
-      const maxAxis = Math.max(size.x, size.y, size.z) || 1;
-      const scale = 3.15 / maxAxis;
-
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xe3343f,
-        metalness: 0.48,
-        roughness: 0.34,
-        emissive: 0x160409,
-        emissiveIntensity: 0.18
+      object.traverse((child) => {
+        if (!child.isMesh) return;
+        child.castShadow = false;
+        child.receiveShadow = false;
+        if (child.material) {
+          const materials = Array.isArray(child.material) ? child.material : [child.material];
+          materials.forEach((material) => {
+            material.side = THREE.DoubleSide;
+            if ('metalness' in material) material.metalness = Math.min(material.metalness ?? 0.25, 0.38);
+            if ('roughness' in material) material.roughness = Math.max(material.roughness ?? 0.42, 0.34);
+          });
+        }
       });
 
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.scale.setScalar(scale);
-      mesh.rotation.x = -0.16;
-      mesh.rotation.y = -0.38;
-      modelGroup.add(mesh);
+      const box = new THREE.Box3().setFromObject(object);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      const maxAxis = Math.max(size.x, size.y, size.z) || 1;
 
-      const edges = new THREE.EdgesGeometry(geometry, 28);
-      const edgeLines = new THREE.LineSegments(
-        edges,
-        new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.14 })
-      );
-      edgeLines.scale.copy(mesh.scale);
-      edgeLines.rotation.copy(mesh.rotation);
-      modelGroup.add(edgeLines);
+      object.position.sub(center);
+      object.scale.setScalar(3.15 / maxAxis);
+      object.rotation.x = -0.16;
+      object.rotation.y = -0.38;
 
+      modelGroup.add(object);
       setLoaded();
     },
     undefined,
