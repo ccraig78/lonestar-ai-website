@@ -61,9 +61,18 @@ p, li { line-height: 1.58; }
 .benefit-grid p, .cost-grid p, .tier-card li, .tier-summary, .consult-note { color: var(--muted); }
 .features { background: linear-gradient(180deg, #f6f1e8, #eaf0fb); }
 .feature-columns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; align-items: stretch; }
+.accordion-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 22px; }
+.accordion-grid details { background: rgba(255,255,255,.82); border: 1px solid var(--line); border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 12px 36px rgba(7,20,38,.06); }
+.accordion-grid summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; font-weight: 950; color: var(--navy); }
+.accordion-grid summary::-webkit-details-marker { display: none; }
+.accordion-grid summary::after { content: '+'; display: inline-grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border-radius: 999px; background: rgba(22,105,216,.12); color: var(--blue); font-size: 1.1rem; }
+.accordion-grid details[open] summary::after { content: '–'; background: rgba(227,52,63,.12); color: var(--red); }
+.accordion-grid summary strong { color: var(--red); font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; white-space: nowrap; }
+.accordion-grid details p { margin: 0; padding: 0 20px 20px; color: var(--muted); }
 .tier-card { position: relative; overflow: hidden; }
 .tier-card.featured { background: var(--navy); color: white; transform: translateY(-12px); }
-.tier-card.featured h3, .tier-card.featured li, .tier-card.featured .tier-summary { color: white; }
+.tier-card.featured h3, .tier-card.featured li, .tier-card.featured .tier-summary, .tier-card.featured .consult-note { color: white; }
+.tier-card.featured .consult-note { border-top-color: rgba(255,255,255,.18); }
 .tier-card strong { color: var(--navy); }
 .tier-card.featured strong { color: white; }
 .local-card { border-top: 6px solid var(--red); }
@@ -104,7 +113,7 @@ footer strong { color: white; }
   .site-header { position: relative; flex-direction: column; align-items: flex-start; }
   .site-header nav { flex-wrap: wrap; }
   .hero, .package-card { grid-template-columns: 1fr; }
-  .benefit-grid, .feature-columns, .cost-grid, .steps-list, .package-grid { grid-template-columns: 1fr; }
+  .benefit-grid, .feature-columns, .cost-grid, .steps-list, .package-grid, .accordion-grid { grid-template-columns: 1fr; }
   .tier-card.featured { transform: none; }
 }
 @media (max-width: 560px) {
