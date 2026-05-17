@@ -116,4 +116,80 @@ document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') setMenuOpen(false);
 });
 
+const chatForm = document.querySelector('[data-chat-form]');
+const chatInput = document.querySelector('[data-chat-input]');
+const chatWindow = document.querySelector('[data-chat-window]');
+const chatBusiness = document.querySelector('[data-chat-business]');
+const chatIndustry = document.querySelector('[data-chat-industry]');
+
+function addChatBubble(message, role = 'assistant') {
+  if (!chatWindow) return;
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${role}`;
+  bubble.textContent = message;
+  chatWindow.appendChild(bubble);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function contextLine() {
+  const business = chatBusiness?.value.trim();
+  const industry = chatIndustry?.value.trim();
+  if (business && industry) return ` For ${business} (${industry}), `;
+  if (business) return ` For ${business}, `;
+  if (industry) return ` For a ${industry} business, `;
+  return ' ';
+}
+
+function lonestarReply(question) {
+  const q = question.toLowerCase();
+  const context = contextLine();
+
+  if (/lead|quote|customer info|details|capture|form/.test(q)) {
+    return `${context}a strong first workflow is a lead intake assistant. It can ask the customer what they need, collect name/phone/email, location, timing, photos or job details, then send the owner a clean summary instead of a vague “how much?” message. This usually fits the Starter Web Assistant Pack when paired with FAQ and callback help.`;
+  }
+
+  if (/faq|question|answer|hours|price|pricing|service|open|customer support|support/.test(q)) {
+    return `${context}the FAQ assistant is usually the cleanest starter feature. It answers approved questions about services, hours, process, what info to send, and next steps. When it does not know something, it should collect the customer's contact info and hand the question to the owner instead of guessing.`;
+  }
+
+  if (/follow|review|cold|remind|message|text|email/.test(q)) {
+    return `${context}a follow-up helper can draft polite messages, organize open leads, and remind the owner who still needs a response. This is useful when quotes, calls, and messages get scattered across the day.`;
+  }
+
+  if (/call|callback|phone|missed|answering/.test(q)) {
+    return `${context}a callback request helper can collect who called, what they need, how urgent it is, and the best time to call back. Full AI phone answering is more advanced, but callback capture is a practical starter workflow.`;
+  }
+
+  if (/cost|price|pricing|much|monthly|pay/.test(q)) {
+    return `LoneStar usually starts with Base Assistant Setup at $500, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack is $899 for a stronger first bundle. Monthly Assistant Care starts at $97/month. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.`;
+  }
+
+  if (/website|site|look at|analyze|review/.test(q)) {
+    return `${context}the future version of this guide should be able to review a business website and suggest specific assistant ideas. This starter website version does not browse live websites yet, but a good first review would look for repeat questions, missing lead details, service pages, contact friction, quote requests, and follow-up gaps.`;
+  }
+
+  if (/auto|repair|collision|truck|bed|shop|salon|restaurant|roofer|plumb|hvac|contractor|lawn|service/.test(q)) {
+    return `${context}I would look for three starter opportunities: 1) answer repeat customer questions, 2) capture better lead details before the owner calls back, and 3) summarize requests so nothing gets lost. If the business already gets quote requests, lead intake is probably the first feature to demo.`;
+  }
+
+  return `${context}a practical LoneStar assistant usually starts with one of four workflows: FAQ answers, lead intake, callback requests, or follow-up help. Tell me whether the biggest problem is repeat questions, vague leads, missed calls, or slow follow-up, and I’ll point you to the best starter feature.`;
+}
+
+function submitChatQuestion(question) {
+  const clean = question.trim();
+  if (!clean) return;
+  addChatBubble(clean, 'user');
+  addChatBubble(lonestarReply(clean), 'assistant');
+}
+
+chatForm?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  submitChatQuestion(chatInput?.value || '');
+  if (chatInput) chatInput.value = '';
+});
+
+document.querySelectorAll('[data-chat-prompt]').forEach((button) => {
+  button.addEventListener('click', () => submitChatQuestion(button.dataset.chatPrompt || button.textContent || ''));
+});
+
 setPainPoint('repeat');
