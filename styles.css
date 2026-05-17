@@ -15,7 +15,7 @@ body { margin: 0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, B
 a { color: inherit; }
 .site-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 12px clamp(18px, 5vw, 72px); background: rgba(240, 244, 249, .94); color: var(--navy); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(7,20,38,.12); box-shadow: 0 12px 34px rgba(7,20,38,.08); }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 950; letter-spacing: .02em; color: var(--navy); }
-.brand img { width: 48px; height: 48px; object-fit: contain; padding: 3px; border-radius: 14px; background: rgba(255,255,255,.72); filter: drop-shadow(0 6px 14px rgba(7,20,38,.16)); }
+.brand img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 6px 14px rgba(7,20,38,.16)); }
 .brand-lone { color: var(--red); }
 .brand-star { color: var(--blue); }
 .brand-word { font-weight: 950; white-space: nowrap; }
