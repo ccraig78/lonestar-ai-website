@@ -334,6 +334,13 @@ p { line-height: 1.58; }
 .chat-bubble.user { justify-self: end; background: linear-gradient(135deg, var(--blue), var(--blue-2)); color: white; border-bottom-right-radius: 5px; }
 .chat-form { display: grid; grid-template-columns: 1fr 44px; gap: 10px; margin-top: 12px; }
 .chat-form button { border: 0; border-radius: 14px; background: linear-gradient(135deg, var(--red), var(--red-2)); color: white; font-weight: 950; cursor: pointer; }
+.hero-chat { align-self: center; }
+.hero-chat .business-context { grid-template-columns: 1fr; }
+.hero-chat .quick-prompts { margin: 10px 0 12px; }
+.hero-chat .quick-prompts button { padding: 8px 12px; font-size: .85rem; }
+.hero-chat .chat-window { min-height: 188px; max-height: 238px; }
+.hero-chat .chat-bubble { font-size: .9rem; max-width: 94%; }
+.hero-chat .chat-form input { min-width: 0; }
 
 .pricing { background: #f7faff; }
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 34px auto 0; max-width: 1120px; }
@@ -439,9 +446,13 @@ p { line-height: 1.58; }
   .mobile-picker { margin-top: 22px; }
   .solution-layout { margin-top: 22px; }
   .quick-prompts { display: grid; grid-template-columns: 1fr; }
+  .hero-chat .hero-prompts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
+  .hero-chat .business-context input, .hero-chat .chat-form input { padding: 11px; }
   .business-context { grid-template-columns: 1fr; }
   .site-chat { padding: 14px; border-radius: 20px; }
   .chat-window { min-height: 260px; max-height: 330px; padding: 12px; }
+  .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
   .chat-bubble { max-width: 94%; font-size: .93rem; }
   .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer { grid-template-columns: 1fr; }
   .mobile-picker { display: block; }

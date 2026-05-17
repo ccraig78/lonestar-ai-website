@@ -45,7 +45,7 @@
     </header>
 
     <main id="top">
-      <section class="hero section-pad">
+      <section id="ask-lonestar" class="hero section-pad">
         <div class="hero-grid">
           <div class="hero-copy">
             <p class="eyebrow blue">DFW small business AI setup</p>
@@ -62,19 +62,27 @@
             </div>
           </div>
 
-          <aside class="assistant-card" aria-label="AI Assistant example">
-            <div class="assistant-top">
+          <aside class="assistant-card site-chat hero-chat" aria-label="LoneStar AI website assistant">
+            <div class="site-chat-header">
               <span class="spark">✦</span>
-              <strong>AI Assistant</strong>
+              <div><strong>LoneStar AI Guide</strong><small>Ask about leads, FAQs, pricing, or your business</small></div>
             </div>
-            <div class="mini-message customer">Hi! How can I help your business today?</div>
-            <div class="task-list">
-              <div><span>?</span><strong>Answer repeat questions</strong><small>24/7, even while you sleep</small></div>
-              <div><span>✎</span><strong>Collect better leads</strong><small>Ask for the details you need</small></div>
-              <div><span>↩</span><strong>Follow up with leads</strong><small>Keep opportunities moving</small></div>
-              <div><span>✓</span><strong>Hand off summaries</strong><small>So you know what happened</small></div>
+            <div class="business-context">
+              <label>Business name <input data-chat-business type="text" placeholder="Smith Auto Repair" /></label>
+              <label>Website or industry <input data-chat-industry type="text" placeholder="auto repair or example.com" /></label>
             </div>
-            <div class="ask-bar"><span>Ask anything...</span><button aria-label="Send example message">➜</button></div>
+            <div class="quick-prompts hero-prompts" aria-label="Example questions">
+              <button type="button" data-chat-prompt="Can you help me with leads?">Leads</button>
+              <button type="button" data-chat-prompt="Can an assistant answer customer questions?">FAQs</button>
+              <button type="button" data-chat-prompt="How much does it cost?">Pricing</button>
+            </div>
+            <div class="chat-window" data-chat-window aria-live="polite">
+              <div class="chat-bubble assistant">Hi — tell me your business name or ask what an AI assistant could do for you.</div>
+            </div>
+            <form class="chat-form" data-chat-form>
+              <input data-chat-input name="question" autocomplete="off" placeholder="Ask what AI could do..." required />
+              <button type="submit" aria-label="Send question">➜</button>
+            </form>
           </aside>
         </div>
       </section>
@@ -159,41 +167,6 @@
               <div class="owner-summary"><strong>Owner receives</strong><p data-demo-owner>Customer asked about Saturday hours and how to get started. Assistant answered the hours, requested contact info, and asked for helpful photos before owner review.</p></div>
             </div>
           </article>
-        </div>
-      </section>
-
-      <section id="ask-lonestar" class="section-pad ask-ai">
-        <div class="ask-ai-grid">
-          <div class="ask-ai-copy">
-            <p class="eyebrow blue">Try the LoneStar guide</p>
-            <h2>Ask what an AI assistant could do for your business.</h2>
-            <p>This quick website guide answers common LoneStar questions, explains starter features, and helps a business owner see which assistant workflow might help first.</p>
-            <div class="quick-prompts" aria-label="Example questions">
-              <button type="button" data-chat-prompt="Can you help me with leads?">Help me with leads</button>
-              <button type="button" data-chat-prompt="Can an assistant answer customer questions?">Answer customer questions</button>
-              <button type="button" data-chat-prompt="How much does it cost?">Explain pricing</button>
-              <button type="button" data-chat-prompt="What could you do for an auto repair shop?">Example for my business</button>
-            </div>
-            <p class="ask-ai-note">Want a custom review? Send your business website in the demo request and LoneStar can suggest specific workflows for your business.</p>
-          </div>
-
-          <div class="site-chat" aria-label="LoneStar AI website assistant">
-            <div class="site-chat-header">
-              <span class="spark">✦</span>
-              <div><strong>LoneStar AI Guide</strong><small>FAQ + starter workflow ideas</small></div>
-            </div>
-            <div class="business-context">
-              <label>Business name <input data-chat-business type="text" placeholder="Example: Smith Auto Repair" /></label>
-              <label>Website or industry <input data-chat-industry type="text" placeholder="example.com or auto repair" /></label>
-            </div>
-            <div class="chat-window" data-chat-window aria-live="polite">
-              <div class="chat-bubble assistant">Hi — I can explain LoneStar AI features and suggest a useful first assistant workflow. What kind of help are you looking for?</div>
-            </div>
-            <form class="chat-form" data-chat-form>
-              <input data-chat-input name="question" autocomplete="off" placeholder="Ask about leads, FAQ, follow-up, pricing..." required />
-              <button type="submit" aria-label="Send question">➜</button>
-            </form>
-          </div>
         </div>
       </section>
 
