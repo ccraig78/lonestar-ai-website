@@ -93,4 +93,27 @@ document.querySelector('[data-lead-form]')?.addEventListener('submit', (event) =
   window.location.href = `mailto:hello@lonestaraiassistants.com?subject=${subject}&body=${body}`;
 });
 
+const siteHeader = document.querySelector('.site-header');
+const menuToggle = document.querySelector('[data-menu-toggle]');
+const primaryNav = document.querySelector('[data-primary-nav]');
+
+function setMenuOpen(isOpen) {
+  siteHeader?.classList.toggle('menu-open', isOpen);
+  menuToggle?.setAttribute('aria-expanded', String(isOpen));
+  menuToggle?.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+}
+
+menuToggle?.addEventListener('click', () => {
+  const isOpen = siteHeader?.classList.contains('menu-open') || false;
+  setMenuOpen(!isOpen);
+});
+
+primaryNav?.querySelectorAll('a').forEach((link) => {
+  link.addEventListener('click', () => setMenuOpen(false));
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') setMenuOpen(false);
+});
+
 setPainPoint('repeat');
