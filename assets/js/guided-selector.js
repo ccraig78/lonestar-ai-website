@@ -86,7 +86,10 @@ document.querySelector('[data-lead-form]')?.addEventListener('submit', (event) =
     `Need: ${data.get('need') || ''}`,
     '',
     'What customers ask / notes:',
-    `${data.get('notes') || ''}`
+    `${data.get('notes') || ''}`,
+    '',
+    'Website assistant lead context:',
+    `${sessionStorage.getItem('lonestarChatLead') || 'No website assistant questions captured in this session.'}`
   ];
   const subject = encodeURIComponent('LoneStar AI demo request');
   const body = encodeURIComponent(lines.join('\n'));
@@ -119,8 +122,110 @@ document.addEventListener('keydown', (event) => {
 const chatForm = document.querySelector('[data-chat-form]');
 const chatInput = document.querySelector('[data-chat-input]');
 const chatWindow = document.querySelector('[data-chat-window]');
+const chatName = document.querySelector('[data-chat-name]');
+const chatContact = document.querySelector('[data-chat-contact]');
 const chatBusiness = document.querySelector('[data-chat-business]');
 const chatIndustry = document.querySelector('[data-chat-industry]');
+
+const featureMatches = [
+  {
+    feature: 'Customer FAQ Assistant',
+    triggers: ['faq', 'same question', 'repeat question', 'common question', 'answer questions', 'hours', 'open', 'policy', 'service area', 'what do i need', 'basic questions'],
+    summary: 'answers approved repeat customer questions and sends unsure questions to the owner instead of guessing.'
+  },
+  {
+    feature: 'Email Assistant',
+    triggers: ['email', 'inbox', 'emails', 'reply to email', 'email summary', 'sort email', 'customer emails'],
+    summary: 'reviews incoming emails, summarizes them, classifies what matters, and drafts owner-approved replies.'
+  },
+  {
+    feature: 'Lead Inquiry Tracking',
+    triggers: ['track leads', 'lead tracker', 'spreadsheet', 'crm', 'lead list', 'organize leads', 'lost leads', 'lead status'],
+    summary: 'turns customer inquiries into clean lead tracker rows with source, status, notes, and next step.'
+  },
+  {
+    feature: 'Website Content Update Assistant',
+    triggers: ['update website', 'website copy', 'site content', 'change my website', 'service page', 'homepage copy', 'web content'],
+    summary: 'drafts safer website copy updates for services, FAQs, contact pages, and landing pages before publishing approval.'
+  },
+  {
+    feature: 'Social Media Draft Assistant',
+    triggers: ['facebook post', 'social media', 'instagram', 'post ideas', 'content calendar', 'caption', 'ad copy', 'marketing post'],
+    summary: 'drafts social posts, captions, and simple promotional ideas in the business voice for owner review.'
+  },
+  {
+    feature: 'Review Response Draft Assistant',
+    triggers: ['review', 'google review', 'facebook review', 'bad review', 'respond to review', 'ratings', 'complaint response'],
+    summary: 'drafts professional responses to public reviews and escalates serious complaints instead of arguing online.'
+  },
+  {
+    feature: 'Business Document Organizer',
+    triggers: ['organize files', 'organize documents', 'messy folders', 'file names', 'folder structure', 'paperwork', 'documents are scattered'],
+    summary: 'helps plan and draft safe organization for approved business files, folders, and document categories.'
+  },
+  {
+    feature: 'Simple Reminder Check-In Workflow',
+    triggers: ['remind me', 'reminders', 'check in', 'forget', 'weekly reminder', 'monthly reminder', 'follow up reminder'],
+    summary: 'creates simple approved reminders or check-ins so owners remember recurring tasks and open items.'
+  },
+  {
+    feature: 'Internal Document Search Assistant',
+    triggers: ['search documents', 'find documents', 'sop', 'manual', 'policies', 'knowledge base', 'staff questions', 'internal docs'],
+    summary: 'helps staff find answers from approved manuals, SOPs, policies, notes, and documents with source boundaries.'
+  },
+  {
+    feature: 'AI Phone Answering Assistant',
+    triggers: ['answer phones', 'phone answering', 'answer calls', 'after hours calls', 'voice agent', 'receptionist', 'calls at night'],
+    summary: 'supports a careful call-intake pilot after testing, routing, guardrails, and phone-tool setup are approved.'
+  },
+  {
+    feature: 'Appointment Scheduling Reminder Assistant',
+    triggers: ['appointment', 'schedule', 'calendar', 'booking', 'reschedule', 'confirm appointment', 'appointment reminder'],
+    summary: 'collects scheduling requests, checks missing information, and drafts confirmations or reminders for approval.'
+  },
+  {
+    feature: 'Quote Estimate Drafting Assistant',
+    triggers: ['quote', 'estimate', 'pricing', 'price request', 'how much', 'bid', 'cost to', 'rough estimate'],
+    summary: 'collects the details needed before a quote and drafts an estimate summary without making unapproved final pricing promises.'
+  },
+  {
+    feature: 'Customer Follow-Up Sequence',
+    triggers: ['follow up', 'leads go cold', 'sequence', 'nurture', 'check back', 'not responding', 'follow-up messages'],
+    summary: 'drafts timed follow-up messages and stop rules so interested customers do not fall through the cracks.'
+  },
+  {
+    feature: 'Job Intake Assistant',
+    triggers: ['job intake', 'new job', 'work order', 'job details', 'customer details', 'photos', 'intake form', 'start a job'],
+    summary: 'collects structured job details, missing information, photos/notes, and an internal summary before the owner reviews.'
+  },
+  {
+    feature: 'Website Contact Form Lead Routing',
+    triggers: ['contact form', 'website form', 'form submissions', 'route leads', 'notify owner', 'web lead', 'form lead'],
+    summary: 'routes website contact-form submissions into owner notifications, draft replies, and lead-tracker handoff steps.'
+  },
+  {
+    feature: 'Photo Job Summary Generation',
+    triggers: ['photos', 'pictures', 'photo summary', 'before and after', 'job photos', 'image notes', 'photo updates'],
+    summary: 'turns approved job photos and notes into internal summaries, customer update drafts, or social/website draft copy.'
+  },
+  {
+    feature: 'Multi-Agent Role Workflow',
+    triggers: ['multiple agents', 'team of agents', 'handoff', 'roles', 'manager agent', 'agent workflow', 'approval gates'],
+    summary: 'plans safe handoffs between specialized assistants with clear roles, permissions, and owner approval gates.'
+  },
+  {
+    feature: 'Business Dashboard Report Summary',
+    triggers: ['dashboard', 'report', 'summary report', 'business summary', 'daily report', 'weekly report', 'owner report', 'metrics'],
+    summary: 'summarizes leads, follow-ups, appointments, website activity, priorities, and data gaps into an owner-ready report.'
+  },
+  {
+    feature: 'Local SEO / Service Page Assistant',
+    triggers: ['seo', 'local seo', 'google search', 'rank on google', 'service page', 'near me', 'google business profile', 'gbp', 'meta title'],
+    summary: 'reviews local search opportunities and drafts service-page, FAQ, title/meta, internal-link, and Google Business Profile recommendations.'
+  }
+];
+
+const chatLead = { questions: [], matchedFeatures: [] };
 
 function addChatBubble(message, role = 'assistant') {
   if (!chatWindow) return;
@@ -131,48 +236,68 @@ function addChatBubble(message, role = 'assistant') {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-function contextLine() {
-  const business = chatBusiness?.value.trim();
-  const industry = chatIndustry?.value.trim();
-  if (business && industry) return ` For ${business} (${industry}), `;
-  if (business) return ` For ${business}, `;
-  if (industry) return ` For a ${industry} business, `;
-  return ' ';
+function prospectContext() {
+  return {
+    name: chatName?.value.trim() || '',
+    contact: chatContact?.value.trim() || '',
+    business: chatBusiness?.value.trim() || '',
+    industry: chatIndustry?.value.trim() || ''
+  };
+}
+
+function contextLeadIn() {
+  const { business, industry } = prospectContext();
+  if (business && industry) return `For ${business} (${industry}),`;
+  if (business) return `For ${business},`;
+  if (industry) return `For a ${industry} business,`;
+  return 'Based on that problem,';
+}
+
+function scoreFeature(feature, question) {
+  const q = question.toLowerCase();
+  return feature.triggers.reduce((score, trigger) => {
+    if (q.includes(trigger)) return score + 10 + Math.max(2, trigger.split(' ').length + 1);
+    const words = trigger.split(/\s+/).filter((word) => word.length > 3);
+    return score + words.filter((word) => q.includes(word)).length;
+  }, 0);
+}
+
+function matchFeature(question) {
+  const scored = featureMatches
+    .map((feature) => ({ ...feature, score: scoreFeature(feature, question) }))
+    .sort((a, b) => b.score - a.score);
+
+  if (scored[0]?.score > 0) return scored[0];
+  return {
+    feature: 'Customer FAQ Assistant',
+    summary: 'is the safest first match when a visitor asks a broad question because it answers approved common questions and escalates anything uncertain.'
+  };
+}
+
+function recordMatch(question, feature) {
+  chatLead.name = chatName?.value.trim() || chatLead.name || '';
+  chatLead.contact = chatContact?.value.trim() || chatLead.contact || '';
+  chatLead.business = chatBusiness?.value.trim() || chatLead.business || '';
+  chatLead.industry = chatIndustry?.value.trim() || chatLead.industry || '';
+  chatLead.questions.push(question);
+  chatLead.matchedFeatures.push(feature.feature);
+  try {
+    sessionStorage.setItem('lonestarChatLead', JSON.stringify(chatLead));
+  } catch (_) {}
+}
+
+function pricingReply() {
+  return 'LoneStar usually starts with Base Assistant Setup at $500, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack is $899 for a stronger first bundle. Monthly Assistant Care starts at $97/month. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
 }
 
 function lonestarReply(question) {
-  const q = question.toLowerCase();
-  const context = contextLine();
-
-  if (/lead|quote|customer info|details|capture|form/.test(q)) {
-    return `${context}a strong first workflow is a lead intake assistant. It can ask the customer what they need, collect name/phone/email, location, timing, photos or job details, then send the owner a clean summary instead of a vague “how much?” message. This usually fits the Starter Web Assistant Pack when paired with FAQ and callback help.`;
+  if (/cost|price|pricing|much|monthly|pay|charge|fee/.test(question.toLowerCase())) {
+    return pricingReply();
   }
 
-  if (/faq|question|answer|hours|price|pricing|service|open|customer support|support/.test(q)) {
-    return `${context}the FAQ assistant is usually the cleanest starter feature. It answers approved questions about services, hours, process, what info to send, and next steps. When it does not know something, it should collect the customer's contact info and hand the question to the owner instead of guessing.`;
-  }
-
-  if (/follow|review|cold|remind|message|text|email/.test(q)) {
-    return `${context}a follow-up helper can draft polite messages, organize open leads, and remind the owner who still needs a response. This is useful when quotes, calls, and messages get scattered across the day.`;
-  }
-
-  if (/call|callback|phone|missed|answering/.test(q)) {
-    return `${context}a callback request helper can collect who called, what they need, how urgent it is, and the best time to call back. Full AI phone answering is more advanced, but callback capture is a practical starter workflow.`;
-  }
-
-  if (/cost|price|pricing|much|monthly|pay/.test(q)) {
-    return `LoneStar usually starts with Base Assistant Setup at $500, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack is $899 for a stronger first bundle. Monthly Assistant Care starts at $97/month. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.`;
-  }
-
-  if (/website|site|look at|analyze|review/.test(q)) {
-    return `${context}the future version of this guide should be able to review a business website and suggest specific assistant ideas. This starter website version does not browse live websites yet, but a good first review would look for repeat questions, missing lead details, service pages, contact friction, quote requests, and follow-up gaps.`;
-  }
-
-  if (/auto|repair|collision|truck|bed|shop|salon|restaurant|roofer|plumb|hvac|contractor|lawn|service/.test(q)) {
-    return `${context}I would look for three starter opportunities: 1) answer repeat customer questions, 2) capture better lead details before the owner calls back, and 3) summarize requests so nothing gets lost. If the business already gets quote requests, lead intake is probably the first feature to demo.`;
-  }
-
-  return `${context}a practical LoneStar assistant usually starts with one of four workflows: FAQ answers, lead intake, callback requests, or follow-up help. Tell me whether the biggest problem is repeat questions, vague leads, missed calls, or slow follow-up, and I’ll point you to the best starter feature.`;
+  const match = matchFeature(question);
+  recordMatch(question, match);
+  return `${contextLeadIn()} best single-feature match: ${match.feature}. It ${match.summary}`;
 }
 
 function submitChatQuestion(question) {
