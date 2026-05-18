@@ -21,13 +21,13 @@ const painPoints = {
   },
   reply: {
     label: 'Good first step for missed calls',
-    title: 'Callback Request Helper',
-    copy: 'Gives customers a simple way to request a call back and tells the owner why they called, how urgent it is, and when to respond.',
-    price: 'Base Assistant Setup — $500',
-    note: 'Can be the included starter feature. AI phone answering is advanced and quoted after review.',
-    customer: 'I called earlier but nobody answered. Can someone call me back today?',
-    assistant: 'Yes. Please send your name, phone number, what you need help with, and the best time to call today. If this is urgent, tell me that too so the owner sees it clearly.',
-    owner: 'Callback request captured: customer wants a call today. Assistant collected name, phone, reason for calling, preferred time, and urgency.'
+    title: 'AI Phone Answering Assistant',
+    copy: 'Helps triage calls and missed-call situations by collecting caller details, urgency, reason for calling, and the best next step.',
+    price: 'Advanced feature — quoted after phone setup review',
+    note: 'A lighter callback capture workflow can be a starter feature; full AI phone answering needs testing, routing, and guardrails.',
+    customer: 'My phone rings constantly and I miss real customers. Can AI help?',
+    assistant: 'Yes. The assistant can collect name, number, reason for calling, urgency, and best callback time, then send the owner a clean summary instead of letting the opportunity disappear.',
+    owner: 'Missed-call lead captured: customer contact info, reason for calling, urgency, and callback timing are organized for owner follow-up.'
   },
   followup: {
     label: 'Best for owner organization',
@@ -175,8 +175,8 @@ const featureMatches = [
   },
   {
     feature: 'AI Phone Answering Assistant',
-    triggers: ['answer phones', 'phone answering', 'answer calls', 'after hours calls', 'voice agent', 'receptionist', 'calls at night'],
-    summary: 'supports a careful call-intake pilot after testing, routing, guardrails, and phone-tool setup are approved.'
+    triggers: ['answer phones', 'phone answering', 'answer calls', 'after hours calls', 'voice agent', 'receptionist', 'calls at night', 'phone rings', 'rings constantly', 'miss calls', 'missed calls', 'miss real customers', 'busy phone', 'call triage', 'call and text triage', 'text triage'],
+    summary: 'captures caller info, urgency, reason for calling, and callback timing when the owner is busy, then routes a clean summary after testing and guardrails are approved.'
   },
   {
     feature: 'Appointment Scheduling Reminder Assistant',

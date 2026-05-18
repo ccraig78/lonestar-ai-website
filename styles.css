@@ -184,7 +184,7 @@ a { color: inherit; }
 
 .benefit-grid { display: grid; gap: 18px; margin-top: 34px; }
 .benefit-grid.four { grid-template-columns: repeat(4, 1fr); }
-.benefit-grid article, .pricing-grid article, .testimonial-grid blockquote {
+.benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: var(--card);
@@ -358,10 +358,38 @@ p { line-height: 1.58; }
 .cta-band p { color: rgba(255,255,255,.72); max-width: 720px; }
 .cta-band .btn { grid-column: 2; grid-row: 1 / span 3; width: auto; }
 
+.about-section { background: #fff; }
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr);
+  gap: clamp(24px, 5vw, 70px);
+  align-items: start;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: linear-gradient(135deg, #fff, #f5f9ff);
+  box-shadow: var(--shadow);
+}
+.about-grid h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(2rem, 4.3vw, 3.45rem);
+  line-height: 1.02;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+.about-copy p { color: var(--muted); font-size: 1.04rem; margin: 0 0 14px; }
+.about-copy p:last-child { margin-bottom: 0; }
+
 .testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 34px; }
 .testimonial-grid blockquote { margin: 0; text-align: left; }
 .testimonial-grid blockquote::before { content: '“'; display: block; color: var(--blue); font-size: 3rem; line-height: .7; }
 .testimonial-grid cite { display: block; margin-top: 16px; color: var(--navy); font-style: normal; font-weight: 950; }
+.testimonial-grid article { text-align: left; }
+.testimonial-grid article span { display: inline-flex; margin-bottom: 14px; padding: 7px 10px; border-radius: 999px; background: rgba(22,105,216,.10); color: var(--blue); font-size: .76rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 950; }
+.testimonial-grid article p { margin: 0; color: var(--muted); }
 
 .contact { background: linear-gradient(180deg, #f4f8ff, #fff); }
 .contact-card { display: grid; grid-template-columns: minmax(0, .84fr) minmax(320px, 1.16fr); gap: clamp(24px, 5vw, 54px); align-items: start; max-width: 1120px; margin-inline: auto; padding: clamp(24px, 5vw, 44px); border-radius: 26px; background: white; border: 1px solid var(--line); box-shadow: var(--shadow); }
@@ -385,7 +413,7 @@ p { line-height: 1.58; }
   .site-header { position: sticky; flex-direction: row; align-items: center; }
   .site-header nav { flex-wrap: wrap; }
   .hero-grid, .solution-layout, .contact-card, .ask-ai-grid { grid-template-columns: 1fr; }
-  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer { grid-template-columns: 1fr 1fr; }
+  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid { grid-template-columns: 1fr 1fr; }
   .steps-line::before { display: none; }
   .featured-price { transform: none; }
   .cta-band > div { grid-template-columns: 1fr; }
@@ -438,7 +466,7 @@ p { line-height: 1.58; }
   .task-list { gap: 8px; }
   .task-list div { grid-template-columns: 36px minmax(0, 1fr); }
   .benefit-grid { gap: 12px; margin-top: 24px; }
-  .benefit-grid article, .pricing-grid article, .testimonial-grid blockquote { padding: 22px 18px; }
+  .benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article { padding: 22px 18px; }
   .section-heading h2, .cta-band h2, .contact-card h2 { font-size: clamp(1.95rem, 10vw, 2.65rem); }
   .steps-line { gap: 14px; margin-top: 28px; }
   .steps-line li { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: 0 10px 28px rgba(7,20,38,.055); }
@@ -454,7 +482,7 @@ p { line-height: 1.58; }
   .chat-window { min-height: 260px; max-height: 330px; padding: 12px; }
   .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
   .chat-bubble { max-width: 94%; font-size: .93rem; }
-  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer { grid-template-columns: 1fr; }
+  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid { grid-template-columns: 1fr; }
   .mobile-picker { display: block; }
   .solution-list { display: none; }
   .result-panel { padding: 20px; border-radius: 20px; }
