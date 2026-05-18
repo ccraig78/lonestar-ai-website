@@ -3,7 +3,7 @@ const painPoints = {
     label: 'Recommended first feature',
     title: 'FAQ Assistant',
     copy: 'Answers common customer questions from approved business info, then points people toward the right next step.',
-    price: 'Base Assistant Setup — $500',
+    price: 'Base Assistant Setup — starting at $497',
     note: 'Includes assistant foundation plus one starter feature.',
     customer: 'Are you open Saturday, and what do I need to send to get started?',
     assistant: 'Yes — Saturday hours are 9:00 AM to 1:00 PM. To get started, please send your name, phone number, what you need help with, and 2–3 photos if photos would help the owner review it.',
@@ -21,10 +21,10 @@ const painPoints = {
   },
   reply: {
     label: 'Good first step for missed calls',
-    title: 'AI Phone Answering Assistant',
-    copy: 'Helps triage calls and missed-call situations by collecting caller details, urgency, reason for calling, and the best next step.',
-    price: 'Advanced feature — quoted after phone setup review',
-    note: 'A lighter callback capture workflow can be a starter feature; full AI phone answering needs testing, routing, and guardrails.',
+    title: 'Callback Request Helper',
+    copy: 'Collects missed-call details, urgency, reason for calling, and best callback time so the owner can respond without losing the lead.',
+    price: 'Base Assistant Setup — starting at $497',
+    note: 'After-hours phone FAQ / lead capture is coming soon after internal testing. Full AI receptionist service is not offered at launch.',
     customer: 'My phone rings constantly and I miss real customers. Can AI help?',
     assistant: 'Yes. The assistant can collect name, number, reason for calling, urgency, and best callback time, then send the owner a clean summary instead of letting the opportunity disappear.',
     owner: 'Missed-call lead captured: customer contact info, reason for calling, urgency, and callback timing are organized for owner follow-up.'
@@ -174,9 +174,10 @@ const featureMatches = [
     summary: 'helps staff find answers from approved manuals, SOPs, policies, notes, and documents with source boundaries.'
   },
   {
-    feature: 'AI Phone Answering Assistant',
+    feature: 'After-Hours Voice FAQ / Lead Capture',
+    status: 'coming-soon',
     triggers: ['answer phones', 'phone answering', 'answer calls', 'after hours calls', 'voice agent', 'receptionist', 'calls at night', 'phone rings', 'rings constantly', 'miss calls', 'missed calls', 'miss real customers', 'busy phone', 'call triage', 'call and text triage', 'text triage'],
-    summary: 'captures caller info, urgency, reason for calling, and callback timing when the owner is busy, then routes a clean summary after testing and guardrails are approved.'
+    summary: 'is planned as a safer after-hours phone FAQ and lead-capture feature after LoneStar tests voice internally. Full AI receptionist service is not offered at launch.'
   },
   {
     feature: 'Appointment Scheduling Reminder Assistant',
@@ -287,7 +288,7 @@ function recordMatch(question, feature) {
 }
 
 function pricingReply() {
-  return 'LoneStar usually starts with Base Assistant Setup at $500, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack is $899 for a stronger first bundle. Monthly Assistant Care starts at $97/month. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
+  return 'LoneStar usually starts with Base Assistant Setup starting at $497, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack starts at $897 for a stronger first bundle. Monthly Assistant Care starts at $97/month for simple setups. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
 }
 
 function lonestarReply(question) {
@@ -297,6 +298,9 @@ function lonestarReply(question) {
 
   const match = matchFeature(question);
   recordMatch(question, match);
+  if (match.status === 'coming-soon') {
+    return `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with safer website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`;
+  }
   return `${contextLeadIn()} best single-feature match: ${match.feature}. It ${match.summary}`;
 }
 

@@ -184,7 +184,7 @@ a { color: inherit; }
 
 .benefit-grid { display: grid; gap: 18px; margin-top: 34px; }
 .benefit-grid.four { grid-template-columns: repeat(4, 1fr); }
-.benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article {
+.benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article, .roadmap-grid article {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: var(--card);
@@ -342,6 +342,15 @@ p { line-height: 1.58; }
 .hero-chat .chat-bubble { font-size: .9rem; max-width: 94%; }
 .hero-chat .chat-form input { min-width: 0; }
 
+.roadmap { background: linear-gradient(180deg, #fff, #f4f8ff); }
+.roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 34px auto 0; max-width: 1120px; }
+.roadmap-grid article { text-align: left; }
+.status-pill { display: inline-flex; margin-bottom: 10px; padding: 7px 10px; border-radius: 999px; font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 950; }
+.status-pill.live { background: rgba(22,105,216,.10); color: var(--blue); }
+.status-pill.review { background: rgba(227,52,63,.10); color: var(--red); }
+.status-pill.soon { background: rgba(7,20,38,.09); color: var(--navy); }
+.roadmap-grid p { color: var(--muted); }
+
 .pricing { background: #f7faff; }
 .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 34px auto 0; max-width: 1120px; }
 .pricing-grid article { text-align: left; }
@@ -413,7 +422,7 @@ p { line-height: 1.58; }
   .site-header { position: sticky; flex-direction: row; align-items: center; }
   .site-header nav { flex-wrap: wrap; }
   .hero-grid, .solution-layout, .contact-card, .ask-ai-grid { grid-template-columns: 1fr; }
-  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid { grid-template-columns: 1fr 1fr; }
+  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid, .roadmap-grid { grid-template-columns: 1fr 1fr; }
   .steps-line::before { display: none; }
   .featured-price { transform: none; }
   .cta-band > div { grid-template-columns: 1fr; }
@@ -466,7 +475,7 @@ p { line-height: 1.58; }
   .task-list { gap: 8px; }
   .task-list div { grid-template-columns: 36px minmax(0, 1fr); }
   .benefit-grid { gap: 12px; margin-top: 24px; }
-  .benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article { padding: 22px 18px; }
+  .benefit-grid article, .pricing-grid article, .testimonial-grid blockquote, .testimonial-grid article, .roadmap-grid article { padding: 22px 18px; }
   .section-heading h2, .cta-band h2, .contact-card h2 { font-size: clamp(1.95rem, 10vw, 2.65rem); }
   .steps-line { gap: 14px; margin-top: 28px; }
   .steps-line li { padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: white; box-shadow: 0 10px 28px rgba(7,20,38,.055); }
@@ -482,7 +491,7 @@ p { line-height: 1.58; }
   .chat-window { min-height: 260px; max-height: 330px; padding: 12px; }
   .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
   .chat-bubble { max-width: 94%; font-size: .93rem; }
-  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid { grid-template-columns: 1fr; }
+  .benefit-grid.four, .steps-line, .pricing-grid, .testimonial-grid, .site-footer, .about-grid, .roadmap-grid { grid-template-columns: 1fr; }
   .mobile-picker { display: block; }
   .solution-list { display: none; }
   .result-panel { padding: 20px; border-radius: 20px; }
