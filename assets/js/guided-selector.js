@@ -127,6 +127,30 @@ const chatContact = document.querySelector('[data-chat-contact]');
 const chatBusiness = document.querySelector('[data-chat-business]');
 const chatIndustry = document.querySelector('[data-chat-industry]');
 
+const GUIDE_CAPTURE_ENDPOINT = (() => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return window.LONESTAR_GUIDE_CAPTURE_ENDPOINT
+      || params.get('guideCaptureEndpoint')
+      || localStorage.getItem('lonestarGuideCaptureEndpoint')
+      || 'https://chat.lonestaraiassistants.com/lonestar-guide-capture';
+  } catch (_) {
+    return window.LONESTAR_GUIDE_CAPTURE_ENDPOINT || 'https://chat.lonestaraiassistants.com/lonestar-guide-capture';
+  }
+})();
+
+const guideSessionId = (() => {
+  try {
+    const existing = sessionStorage.getItem('lonestarGuideSessionId');
+    if (existing) return existing;
+    const generated = `ls-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    sessionStorage.setItem('lonestarGuideSessionId', generated);
+    return generated;
+  } catch (_) {
+    return `ls-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+})();
+
 const featureMatches = [
   {
     feature: 'Customer FAQ Assistant',
@@ -275,40 +299,74 @@ function matchFeature(question) {
   };
 }
 
-function recordMatch(question, feature) {
-  chatLead.name = chatName?.value.trim() || chatLead.name || '';
-  chatLead.contact = chatContact?.value.trim() || chatLead.contact || '';
-  chatLead.business = chatBusiness?.value.trim() || chatLead.business || '';
-  chatLead.industry = chatIndustry?.value.trim() || chatLead.industry || '';
+function rememberInteraction(question, feature) {
+  const context = prospectContext();
+  chatLead.name = context.name || chatLead.name || '';
+  chatLead.contact = context.contact || chatLead.contact || '';
+  chatLead.business = context.business || chatLead.business || '';
+  chatLead.industry = context.industry || chatLead.industry || '';
   chatLead.questions.push(question);
-  chatLead.matchedFeatures.push(feature.feature);
+  if (feature?.feature) chatLead.matchedFeatures.push(feature.feature);
   try {
     sessionStorage.setItem('lonestarChatLead', JSON.stringify(chatLead));
   } catch (_) {}
+  return context;
+}
+
+function captureGuideInteraction({ question, answer, match, context }) {
+  if (!GUIDE_CAPTURE_ENDPOINT) return;
+  const payload = {
+    source: 'lonestar-ai-guide',
+    sessionId: guideSessionId,
+    page: window.location.href,
+    context,
+    question,
+    answer,
+    matchedFeature: match?.feature || '',
+    matchStatus: match?.status || '',
+    matchScore: match?.score || null,
+    allQuestionsThisSession: chatLead.questions,
+    matchedFeaturesThisSession: chatLead.matchedFeatures,
+    userAgent: navigator.userAgent
+  };
+
+  fetch(GUIDE_CAPTURE_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(() => {
+    // Logging should never break the visitor-facing guide.
+  });
 }
 
 function pricingReply() {
   return 'LoneStar usually starts with Base Assistant Setup starting at $497, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack starts at $897 for a stronger first bundle. Monthly Assistant Care starts at $97/month for simple setups. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
 }
 
-function lonestarReply(question) {
+function buildGuideResponse(question) {
   if (/cost|price|pricing|much|monthly|pay|charge|fee/.test(question.toLowerCase())) {
-    return pricingReply();
+    return {
+      match: { feature: 'Pricing / Package Question', score: 99 },
+      answer: pricingReply()
+    };
   }
 
   const match = matchFeature(question);
-  recordMatch(question, match);
-  if (match.status === 'coming-soon') {
-    return `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with safer website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`;
-  }
-  return `${contextLeadIn()} best single-feature match: ${match.feature}. It ${match.summary}`;
+  const answer = match.status === 'coming-soon'
+    ? `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with safer website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`
+    : `${contextLeadIn()} best single-feature match: ${match.feature}. It ${match.summary}`;
+  return { match, answer };
 }
 
 function submitChatQuestion(question) {
   const clean = question.trim();
   if (!clean) return;
+  const { match, answer } = buildGuideResponse(clean);
+  const context = rememberInteraction(clean, match);
   addChatBubble(clean, 'user');
-  addChatBubble(lonestarReply(clean), 'assistant');
+  addChatBubble(answer, 'assistant');
+  captureGuideInteraction({ question: clean, answer, match, context });
 }
 
 chatForm?.addEventListener('submit', (event) => {
