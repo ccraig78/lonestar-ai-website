@@ -1,10 +1,10 @@
 const painPoints = {
   repeat: {
-    label: 'Recommended first feature',
+    label: 'Useful workflow example',
     title: 'FAQ Assistant',
     copy: 'Answers common customer questions from approved business info, then points people toward the right next step.',
-    price: 'Base Assistant Setup — starting at $497',
-    note: 'Includes assistant foundation plus one starter feature.',
+    price: 'Included in the AI Advantage Package — starting at $1,997',
+    note: 'A simple one-workflow setup can still start at $497 when a smaller first step fits better.',
     customer: 'Are you open Saturday, and what do I need to send to get started?',
     assistant: 'Yes — Saturday hours are 9:00 AM to 1:00 PM. To get started, please send your name, phone number, what you need help with, and 2–3 photos if photos would help the owner review it.',
     owner: 'Customer asked about Saturday hours and how to get started. Assistant answered the hours, requested contact info, and asked for helpful photos before owner review.'
@@ -13,8 +13,8 @@ const painPoints = {
     label: 'Best fit when leads are vague',
     title: 'Lead Intake Assistant',
     copy: 'Collects the details the owner needs before calling back: name, phone, service need, photos, location, timeline, and missing information.',
-    price: 'Often best in the $899 Starter Web Assistant Pack',
-    note: 'Base setup is counted once. Lead intake can be bundled with FAQ, callback help, and website chat.',
+    price: 'Included in the AI Advantage Package — starting at $1,997',
+    note: 'Bundled with FAQ, callback help, website chat, drafts, owner summaries, training, and one tune-up.',
     customer: 'Can I get a price on this job?',
     assistant: 'I can help the owner review it faster. What service do you need, what city are you in, when do you need it done, and can you send 2–3 photos? Please include your name and best callback number too.',
     owner: 'Price request captured with service type, city, timing, photos requested, name, and callback number — fewer missing details before the owner responds.'
@@ -23,8 +23,8 @@ const painPoints = {
     label: 'Good first step for missed calls',
     title: 'Callback Request Helper',
     copy: 'Collects missed-call details, urgency, reason for calling, and best callback time so the owner can respond without losing the lead.',
-    price: 'Base Assistant Setup — starting at $497',
-    note: 'After-hours phone FAQ / lead capture is coming soon after internal testing. Full AI receptionist service is not offered at launch.',
+    price: 'Included in the AI Advantage Package — starting at $1,997',
+    note: 'For launch, the practical first step is website chat and callback-request capture. Full AI receptionist service is not offered at launch.',
     customer: 'My phone rings constantly and I miss real customers. Can AI help?',
     assistant: 'Yes. The assistant can collect name, number, reason for calling, urgency, and best callback time, then send the owner a clean summary instead of letting the opportunity disappear.',
     owner: 'Missed-call lead captured: customer contact info, reason for calling, urgency, and callback timing are organized for owner follow-up.'
@@ -33,8 +33,8 @@ const painPoints = {
     label: 'Best for owner organization',
     title: 'Follow-Up Helper',
     copy: 'Drafts polite follow-up messages and helps organize which leads, quotes, and open opportunities need attention.',
-    price: 'Standard workflow usually starts around $300–$500 after base setup',
-    note: 'If combined with lead tracking and daily summaries, a value pack may be a better fit.',
+    price: 'Included in the AI Advantage Package — starting at $1,997',
+    note: 'Best when combined with lead tracking, owner summaries, and draft-based follow-up workflows.',
     customer: 'I got a quote last week but I still have a question before I decide.',
     assistant: 'No problem. What name was the quote under, what question do you have, and what is the best phone or email for the owner to follow up? I’ll summarize it clearly for review.',
     owner: 'Follow-up needed on prior quote. Assistant captured the quote name, customer question, and best contact method so the owner can reply without digging through old messages.'
@@ -170,7 +170,7 @@ const featureMatches = [
   {
     feature: 'Website Content Update Assistant',
     triggers: ['update website', 'website copy', 'site content', 'change my website', 'service page', 'homepage copy', 'web content'],
-    summary: 'drafts safer website copy updates for services, FAQs, contact pages, and landing pages before publishing approval.'
+    summary: 'drafts owner-approved website copy updates for services, FAQs, contact pages, and landing pages before publishing.'
   },
   {
     feature: 'Social Media Draft Assistant',
@@ -185,7 +185,7 @@ const featureMatches = [
   {
     feature: 'Business Document Organizer',
     triggers: ['organize files', 'organize documents', 'messy folders', 'file names', 'folder structure', 'paperwork', 'documents are scattered'],
-    summary: 'helps plan and draft safe organization for approved business files, folders, and document categories.'
+    summary: 'helps plan and draft clearer organization for approved business files, folders, and document categories.'
   },
   {
     feature: 'Simple Reminder Check-In Workflow',
@@ -201,7 +201,7 @@ const featureMatches = [
     feature: 'After-Hours Voice FAQ / Lead Capture',
     status: 'coming-soon',
     triggers: ['answer phones', 'phone answering', 'answer calls', 'after hours calls', 'voice agent', 'receptionist', 'calls at night', 'phone rings', 'rings constantly', 'miss calls', 'missed calls', 'miss real customers', 'busy phone', 'call triage', 'call and text triage', 'text triage'],
-    summary: 'is planned as a safer after-hours phone FAQ and lead-capture feature after LoneStar tests voice internally. Full AI receptionist service is not offered at launch.'
+    summary: 'is planned as an after-hours phone FAQ and lead-capture feature after LoneStar proves the workflow internally. Full AI receptionist service is not offered at launch.'
   },
   {
     feature: 'Appointment Scheduling Reminder Assistant',
@@ -236,7 +236,7 @@ const featureMatches = [
   {
     feature: 'Multi-Agent Role Workflow',
     triggers: ['multiple agents', 'team of agents', 'handoff', 'roles', 'manager agent', 'agent workflow', 'approval gates'],
-    summary: 'plans safe handoffs between specialized assistants with clear roles, permissions, and owner approval gates.'
+    summary: 'plans clear handoffs between specialized assistants with defined roles, permissions, and owner approval gates.'
   },
   {
     feature: 'Business Dashboard Report Summary',
@@ -295,7 +295,7 @@ function matchFeature(question) {
   if (scored[0]?.score > 0) return scored[0];
   return {
     feature: 'Customer FAQ Assistant',
-    summary: 'is the safest first match when a visitor asks a broad question because it answers approved common questions and escalates anything uncertain.'
+    summary: 'is the most practical first match when a visitor asks a broad question because it answers approved common questions and escalates anything uncertain.'
   };
 }
 
@@ -341,7 +341,7 @@ function captureGuideInteraction({ question, answer, match, context }) {
 }
 
 function pricingReply() {
-  return 'LoneStar usually starts with Base Assistant Setup starting at $497, which includes the assistant foundation and one starter feature. The Starter Web Assistant Pack starts at $897 for a stronger first bundle. Monthly Assistant Care starts at $97/month for simple setups. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
+  return 'The recommended LoneStar offer is the Small Business AI Advantage Package, starting at $1,997. It bundles practical starter workflows like FAQ/business info, website chat, lead intake, callback requests, reply drafts, review/social/SEO drafts, owner summaries, training, and one tune-up. Monthly Assistant Care starts at $247/month for support and improvements. Very small one-workflow setups can still start at $497 when that fits better. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
 }
 
 function buildGuideResponse(question) {
@@ -354,8 +354,8 @@ function buildGuideResponse(question) {
 
   const match = matchFeature(question);
   const answer = match.status === 'coming-soon'
-    ? `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with safer website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`
-    : `${contextLeadIn()} best single-feature match: ${match.feature}. It ${match.summary}`;
+    ? `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with practical website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`
+    : `${contextLeadIn()} best practical workflow match: ${match.feature}. It ${match.summary}`;
   return { match, answer };
 }
 
