@@ -412,7 +412,7 @@ p { line-height: 1.58; }
   width: 285px;
   aspect-ratio: 1;
   background: url('assets/images/ls-star-rounded-gradient.svg') center / contain no-repeat;
-  opacity: .85;
+  opacity: .65;
   pointer-events: none;
 }
 .pricing-grid article > * { position: relative; z-index: 1; }
