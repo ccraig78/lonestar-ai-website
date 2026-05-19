@@ -327,7 +327,7 @@ function followUpStatusFor(intentLevel, context) {
 }
 
 function nextActionFor(intentLevel, context) {
-  if (intentLevel === 'Lead — follow up now') return 'Clint/Codi review and follow up.';
+  if (intentLevel === 'Lead — follow up now') return 'Clint review and follow up; Codi may help triage/draft internally.';
   if (intentLevel === 'FAQ/content gap') return 'Review for website FAQ/copy improvement.';
   if (intentLevel === 'Feature signal') return 'Review for future offer or add-on signal.';
   if (context.business || context.website) return 'Review business context; invite contact info if useful.';
@@ -361,7 +361,7 @@ function rememberInteraction(question, feature, answer) {
     contentGapFlag: intentLevel === 'FAQ/content gap',
     featureSignalFlag: intentLevel === 'Feature signal',
     stellaAnswerSummary: summarizeAnswer(answer),
-    assignedTo: intentLevel === 'Lead — follow up now' ? 'Clint/Codi' : 'Codi/Buddy daily review'
+    assignedTo: intentLevel === 'Lead — follow up now' ? 'Clint' : 'Codi/Buddy daily review'
   };
 }
 
@@ -423,7 +423,7 @@ function buildGuideResponse(question) {
 
 function addFollowUpNudge(answer, leadMeta) {
   if (leadMeta.intentLevel === 'Lead — follow up now') {
-    return `${answer}\n\nThanks — I’ll save this for LoneStar to review. Clint can follow up, and you can also email hello@lonestaraiassistants.com or call/text 214-470-8099 if you want to move faster.`;
+    return `${answer}\n\nThanks — I’ll pass this to LoneStar AI so Clint can review it and follow up if appropriate. You can also reach LoneStar AI at hello@lonestaraiassistants.com or call/text 214-470-8099 if you want to move faster.`;
   }
   if (!leadMeta.context.contact && leadMeta.intentLevel !== 'Support/noise/spam') {
     return `${answer}\n\nIf you want a practical recommendation for your business, leave your name and phone or email and check the follow-up box.`;
