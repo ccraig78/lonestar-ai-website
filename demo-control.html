@@ -17,18 +17,20 @@
       --muted: #b8c7dd;
       --glass: rgba(255,255,255,.09);
       --line: rgba(255,255,255,.16);
-      --site-bg: #64748b;
+      --site-bg: #d7d3c8;
       --site-card: rgba(255,255,255,.94);
-      --site-text: #112033;
-      --site-accent: #1669d8;
-      --site-banner: #1e293b;
-      --site-banner-text: #fff;
-      --site-surface: rgba(255,255,255,.88);
-      --site-card-bg: rgba(255,255,255,.72);
-      --site-muted: rgba(17,32,51,.75);
-      --site-faint: rgba(17,32,51,.55);
+      --site-text: #7a341f;
+      --site-accent: #a8551e;
+      --site-banner: #f3efe4;
+      --site-banner-text: #ffffff;
+      --site-surface: rgba(255,255,255,.86);
+      --site-card-bg: rgba(255,255,255,.60);
+      --site-muted: rgba(122,52,31,.68);
+      --site-faint: rgba(122,52,31,.46);
+      --site-nav-text: #ffffff;
+      --site-nav-muted: rgba(255,255,255,.78);
       --review-display: none;
-      --site-radius: 24px;
+      --site-radius: 6px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -103,6 +105,10 @@
       font-size: 13px;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
     }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    .home-link { color: #f7fbff; border: 1px solid var(--line); background: rgba(47,134,255,.18); border-radius: 999px; padding: 10px 14px; font-size: 13px; font-weight: 900; text-decoration: none; }
+    .home-link:hover, .home-link:focus-visible { background: var(--red); border-color: rgba(255,255,255,.34); outline: none; }
 
     .headline {
       display: grid;
@@ -334,12 +340,12 @@
       gap: 15px;
       padding: 17px 22px;
       background: var(--site-surface);
-      color: var(--site-text);
+      color: var(--site-nav-text);
     }
 
     .biz-logo { display: flex; align-items: center; gap: 10px; font-weight: 950; letter-spacing: -.04em; }
     .biz-logo span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--site-accent); transition: background .5s ease, border-radius .5s ease; }
-    .site-nav nav { display: flex; gap: 15px; color: var(--site-muted); font-size: 14px; font-weight: 700; transition: color .5s ease; }
+    .site-nav nav { display: flex; gap: 15px; color: var(--site-nav-muted); font-size: 14px; font-weight: 700; transition: color .5s ease; }
     .site-nav nav span { transition: color .35s ease, transform .35s ease; }
     .site-nav.centered { flex-direction: column; justify-content: center; text-align: center; }
     .site-nav.centered nav { justify-content: center; flex-wrap: wrap; }
@@ -462,7 +468,7 @@
 
     .progress-strip {
       display: grid;
-      grid-template-columns: repeat(20, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(16px, 1fr));
       gap: 4px;
       margin-top: 7px;
     }
@@ -505,13 +511,13 @@
           <small>Change your website as easily as sending a text</small>
         </div>
       </div>
-      <div class="pill">Auto-runs 20 demo changes at a slower, easy-to-follow pace</div>
+      <div class="top-actions"><a class="home-link" href="index.html">← LoneStar home</a><div class="pill">Auto-runs the website improvement story at an easy-to-follow pace</div></div>
     </header>
 
     <section class="headline">
       <div>
         <h1>The customer asks. <span>The website changes.</span></h1>
-        <p class="subhead">This mock demo shows the idea in two minutes: a business owner types ordinary website requests, the LoneStar AI Assistant shows visible work, and the demo site changes in front of them.</p>
+        <p class="subhead">This mock demo starts with an “okay but not great” website, then improves it one plain-English request at a time: readability, colors, hours, services, reviews, pages, buttons, and final polish.</p>
       </div>
       <div class="controls">
         <button id="playPause" type="button">Pause demo</button>
@@ -527,7 +533,7 @@
             <span class="agent-dot"></span>
             <div><strong>LoneStar AI Assistant</strong><small>Website control mode</small></div>
           </div>
-          <div class="run-badge" id="runBadge">Run 1 / 20</div>
+          <div class="run-badge" id="runBadge">Run 1 / 24</div>
         </div>
         <div class="messages" id="messages" aria-live="polite"></div>
         <div class="composer">
@@ -545,7 +551,7 @@
           <div class="site-inner" id="siteInner">
             <header class="site-nav">
               <div class="biz-logo"><span id="bizIcon">BBQ</span><div><strong id="businessName">Cedar Hill BBQ Co.</strong><small id="tagLine" style="display:block;color:var(--site-faint);font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Local family barbecue</small></div></div>
-              <nav id="siteNav"><span>Menu</span><span>Events</span><span>Reviews</span><span id="newPageLink" hidden>Catering</span><span>Contact</span></nav>
+              <nav id="siteNav"><span>Menu</span><span>Events</span><span>Reviews</span><span id="newPageLink" hidden>Catering</span><span id="galleryPageLink" hidden>Gallery</span><span>Contact</span></nav>
             </header>
             <div class="site-alert" id="siteBanner"><span class="alert-inner" id="bannerText">Family platters available all weekend — call ahead.</span></div>
             <section class="site-hero">
@@ -573,111 +579,131 @@
         </div>
       </section>
     </section>
-    <div class="progress-label"><span>20-run demo sequence</span><span>10 change types • 2 results each</span></div>
+    <div class="progress-label"><span>Improvement demo sequence</span><span>Bad/okay site → clear, updated, useful website</span></div>
     <div class="progress-strip" id="progressStrip" aria-label="Demo progress"></div>
   </main>
 
   <script>
     const steps = [
       {
-        type: 'Page color', request: 'Change the page color to dark blue so it feels more like our brand.',
-        logs: ['Reading current page colors', 'Applying dark blue background', 'Checking button and banner contrast', 'Dark blue page color published'],
-        apply() { setTheme({bg:'#082f63', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#0b2e67,#2f86ff 58%,#e3343f)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('siteInner'); }
+        type: 'Fix header contrast', request: 'The header text is hard to read. Make the menu text dark blue so people can actually see it.',
+        logs: ['Detecting low-contrast header text', 'Changing header/menu text color', 'Checking logo label readability', 'Header text is readable now'],
+        apply() { setTheme({navText:'#112033', navMuted:'rgba(17,32,51,.72)', faint:'rgba(17,32,51,.55)'}); changed('siteInner'); }
       },
       {
-        type: 'Text color', request: 'Make the website text white for a darker, more premium look.',
-        logs: ['Switching site text tokens', 'Darkening card surfaces', 'Checking headline contrast', 'White text mode published'],
-        apply() { setTheme({surface:'rgba(6,18,35,.92)', cardBg:'rgba(255,255,255,.10)', text:'#ffffff', muted:'rgba(255,255,255,.78)', faint:'rgba(255,255,255,.58)', banner:'#1669d8'}); changed('siteInner'); }
+        type: 'Update outdated banner', request: 'Remove the outdated weekend platter message and add a clear catering banner.',
+        logs: ['Finding announcement banner', 'Replacing old message', 'Checking banner contrast', 'Banner updated'],
+        apply() { bannerText.textContent = 'Catering orders open this week — request a quote by Friday.'; setTheme({banner:'#0b2e67', bannerText:'#ffffff'}); changed('siteBanner'); }
       },
       {
-        type: 'Banner motion', request: 'Make the announcement banner scroll across the top.',
-        logs: ['Finding announcement banner', 'Adding smooth scroll behavior', 'Checking motion speed', 'Scrolling banner turned on'],
-        apply() { bannerText.textContent = 'Weekend special: family platters, catering trays, and pickup packs available now.'; siteBanner.classList.add('scrolling'); changed('siteBanner'); }
+        type: 'Page color', request: 'Change the page color to dark blue so the site feels more professional.',
+        logs: ['Reading current theme', 'Applying dark blue background', 'Checking page sections', 'Dark blue page color published'],
+        apply() { setTheme({bg:'#082f63', accent:'#2f86ff', photo:'linear-gradient(135deg,#0b2e67,#2f86ff 58%,#e3343f)', radius:'18px'}); changed('siteInner'); }
       },
       {
-        type: 'Button', request: 'Add a button for catering orders.',
-        logs: ['Finding homepage buttons', 'Adding catering call-to-action', 'Checking mobile wrap', 'New button added'],
-        apply() { extraCta.textContent = 'Book Catering'; extraCta.classList.add('show'); changed('extraCta'); }
+        type: 'Text color', request: 'Now make the main text white so it matches the darker website style.',
+        logs: ['Switching text tokens', 'Darkening content cards', 'Checking contrast in cards and header', 'White text mode published'],
+        apply() { setTheme({surface:'rgba(6,18,35,.92)', cardBg:'rgba(255,255,255,.10)', text:'#ffffff', muted:'rgba(255,255,255,.80)', faint:'rgba(255,255,255,.62)', navText:'#ffffff', navMuted:'rgba(255,255,255,.78)'}); changed('siteInner'); }
       },
       {
-        type: 'Hours', request: 'Change the hours to 9 AM to 6 PM Monday through Saturday.',
-        logs: ['Finding hours card', 'Updating weekday schedule', 'Checking footer references', 'Hours changed'],
+        type: 'Hero headline', request: 'The headline is generic. Make it clearly say what we sell.',
+        logs: ['Reviewing homepage hero', 'Writing clearer headline', 'Updating supporting copy', 'Hero message improved'],
+        apply() { kicker.textContent = 'Fresh smoke. Easy catering.'; heroTitle.textContent = 'Real Texas barbecue for family meals and local events.'; heroCopy.textContent = 'Order pickup for tonight, request catering for your next event, or ask about weekly specials — all from one clear website.'; changed('siteInner'); }
+      },
+      {
+        type: 'Hours', request: 'The hours are old. Change them to 9 AM to 6 PM Monday through Saturday.',
+        logs: ['Finding hours card', 'Replacing outdated schedule', 'Checking mobile card', 'Hours updated'],
         apply() { hoursText.innerHTML = 'Mon–Sat 9 AM–6 PM<br>Sunday 11 AM–4 PM'; changed('hoursCard'); }
       },
       {
-        type: 'Header layout', request: 'Change the header layout so the logo is centered above the menu.',
-        logs: ['Reading header layout', 'Centering logo and navigation', 'Checking spacing', 'Header layout updated'],
+        type: 'Featured service', request: 'Make catering the featured service because that is what we want more of.',
+        logs: ['Finding featured service card', 'Writing catering-focused copy', 'Checking homepage priority', 'Featured service updated'],
+        apply() { serviceText.textContent = 'BBQ catering trays for office lunches, family parties, and local events.'; primaryCta.textContent = 'Request Catering Quote'; changed('serviceCard'); changed('primaryCta'); }
+      },
+      {
+        type: 'Button', request: 'Add a second button for pickup orders so catering and pickup are both easy to find.',
+        logs: ['Finding homepage buttons', 'Adding pickup call-to-action', 'Checking mobile wrap', 'Button added'],
+        apply() { extraCta.textContent = 'Start Pickup Order'; extraCta.classList.add('show'); changed('extraCta'); }
+      },
+      {
+        type: 'Banner motion', request: 'Make the catering banner scroll slowly so people notice it.',
+        logs: ['Finding banner', 'Adding smooth motion', 'Checking speed', 'Scrolling banner turned on'],
+        apply() { bannerText.textContent = 'Catering orders open this week • Office lunches • Family parties • Local events'; siteBanner.classList.add('scrolling'); changed('siteBanner'); }
+      },
+      {
+        type: 'Header layout', request: 'Clean up the header layout and center the logo above the menu.',
+        logs: ['Reading header layout', 'Centering logo and navigation', 'Checking spacing', 'Header layout improved'],
         apply() { document.querySelector('.site-nav').classList.add('centered'); changed('siteInner'); }
       },
       {
-        type: 'New page link', request: 'Add a Catering page link in the header.',
-        logs: ['Opening site navigation', 'Adding Catering page link', 'Checking header width', 'New page link added'],
+        type: 'Page link', request: 'Add a Catering page link in the header.',
+        logs: ['Opening navigation', 'Adding Catering page link', 'Checking header width', 'Catering link added'],
         apply() { newPageLink.hidden = false; changed('siteNav'); }
       },
       {
-        type: 'Review', request: 'Add a customer review to the homepage.',
+        type: 'Review', request: 'Add a customer review to make the homepage feel more trustworthy.',
         logs: ['Finding review area', 'Adding approved customer quote', 'Checking card layout', 'Review added'],
         apply() { setVar('--review-display', 'block'); reviewText.textContent = '“Best brisket in town and the staff made catering easy.” — Maria G.'; changed('reviewCard'); }
       },
       {
-        type: 'Logo', request: 'Change the logo to a flame icon for barbecue season.',
-        logs: ['Finding logo mark', 'Swapping icon style', 'Checking header readability', 'Logo updated'],
+        type: 'Logo', request: 'Update the logo mark so it feels more like a barbecue business.',
+        logs: ['Finding logo mark', 'Swapping icon style', 'Updating brand label', 'Logo updated'],
         apply() { bizIcon.textContent = '🔥'; bizIcon.style.borderRadius = '999px'; businessName.textContent = 'Cedar Hill Smokehouse'; tagLine.textContent = 'Barbecue • Catering • Pickup'; changed('siteInner'); }
       },
       {
-        type: 'Featured service + theme', request: 'Feature wedding catering and make the colors feel elegant.',
-        logs: ['Updating featured service', 'Matching color theme to service', 'Checking homepage visual balance', 'Featured service and theme updated'],
-        apply() { serviceText.textContent = 'Wedding catering with smoked meats, sides, and simple serving options.'; heroTitle.textContent = 'Wedding catering with real Texas flavor.'; heroCopy.textContent = 'Give guests a meal they remember with slow-smoked brisket, sausage, sides, and easy catering support.'; setTheme({bg:'#3f2a56', accent:'#9f7aea', banner:'#2d1b42', photo:'linear-gradient(135deg,#2d1b42,#9f7aea 48%,#f6ad55)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.75)', text:'#162033', muted:'rgba(22,32,51,.76)', faint:'rgba(22,32,51,.55)'}); changed('serviceCard'); changed('photoCard'); }
+        type: 'Visual polish', request: 'Make the image area look more appetizing and less plain.',
+        logs: ['Updating visual direction', 'Changing photo caption', 'Matching colors to barbecue', 'Hero visual polished'],
+        apply() { setVar('--photo-gradient', 'linear-gradient(135deg,#111827,#6b2f1a 55%,#e3343f)'); photoTitle.textContent = 'Premium Smoke'; photoSub.textContent = 'Brisket • Ribs • Catering trays'; changed('photoCard'); }
       },
       {
-        type: 'Page color', request: 'Change the page color back to a clean gray look.',
-        logs: ['Reading page colors', 'Switching background to clean gray', 'Checking contrast', 'Gray page color published'],
-        apply() { setTheme({bg:'#64748b', accent:'#1669d8', banner:'#1e293b', photo:'linear-gradient(135deg,#94a3b8,#334155)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('siteInner'); }
+        type: 'SEO text', request: 'Help the page target BBQ catering near Cedar Hill and Duncanville.',
+        logs: ['Drafting local SEO phrase', 'Adding service keywords naturally', 'Avoiding spammy wording', 'SEO preview updated'],
+        apply() { seoText.textContent = 'SEO: BBQ catering near Cedar Hill & Duncanville, TX'; changed('seoText'); }
       },
       {
-        type: 'Text color', request: 'Change the text back to dark blue for a lighter page.',
-        logs: ['Restoring dark blue text', 'Lightening card surfaces', 'Checking readability', 'Dark blue text restored'],
-        apply() { setTheme({surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)', banner:'#1669d8'}); changed('siteInner'); }
+        type: 'Lead form', request: 'Add event size to the catering lead form.',
+        logs: ['Finding lead capture fields', 'Adding event size', 'Checking owner summary fields', 'Lead form updated'],
+        apply() { leadText.textContent = 'Lead form: Name, phone, event date, event size'; changed('leadText'); }
       },
       {
-        type: 'Banner motion', request: 'Stop the banner from scrolling and leave it still.',
-        logs: ['Finding announcement banner', 'Removing scroll behavior', 'Setting fixed message', 'Static banner restored'],
-        apply() { siteBanner.classList.remove('scrolling'); bannerText.textContent = 'Summer lunch special: brisket sandwich combo every weekday.'; changed('siteBanner'); }
+        type: 'FAQ', request: 'Add an FAQ that says we need 48 hours notice for catering orders.',
+        logs: ['Opening FAQ content', 'Adding catering notice', 'Checking plain-English answer', 'FAQ updated'],
+        apply() { faqText.textContent = 'How much notice for catering? Please request catering at least 48 hours ahead.'; changed('faqCard'); }
       },
       {
-        type: 'Button', request: 'Remove the extra catering button.',
-        logs: ['Finding homepage buttons', 'Removing extra call-to-action', 'Checking remaining buttons', 'Extra button removed'],
-        apply() { extraCta.classList.remove('show'); changed('primaryCta'); }
+        type: 'Theme match', request: 'Make the theme match wedding catering and look more elegant.',
+        logs: ['Matching colors to featured service', 'Updating accent and photo theme', 'Checking contrast', 'Elegant catering theme applied'],
+        apply() { serviceText.textContent = 'Wedding catering with smoked meats, sides, and simple serving options.'; heroTitle.textContent = 'Wedding catering with real Texas flavor.'; heroCopy.textContent = 'Give guests a meal they remember with slow-smoked brisket, sides, and easy catering support.'; setTheme({bg:'#3f2a56', accent:'#9f7aea', banner:'#2d1b42', photo:'linear-gradient(135deg,#2d1b42,#9f7aea 48%,#f6ad55)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.75)', text:'#162033', muted:'rgba(22,32,51,.76)', faint:'rgba(22,32,51,.55)', navText:'#162033', navMuted:'rgba(22,32,51,.72)'}); changed('serviceCard'); changed('photoCard'); }
       },
       {
-        type: 'Hours', request: 'Revert the hours back to the regular schedule.',
-        logs: ['Finding hours card', 'Restoring regular schedule', 'Checking footer references', 'Hours reverted'],
-        apply() { hoursText.innerHTML = 'Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM'; changed('hoursCard'); }
+        type: 'Header contrast check', request: 'The new lighter header needs dark text. Make sure the header is readable.',
+        logs: ['Checking header contrast', 'Setting dark menu text', 'Checking logo subtitle', 'Header contrast confirmed'],
+        apply() { setTheme({navText:'#162033', navMuted:'rgba(22,32,51,.72)', faint:'rgba(22,32,51,.55)'}); changed('siteInner'); }
       },
       {
-        type: 'Header layout', request: 'Revert the header layout back to logo left and menu right.',
-        logs: ['Reading header layout', 'Restoring split header', 'Checking spacing', 'Header layout reverted'],
-        apply() { document.querySelector('.site-nav').classList.remove('centered'); changed('siteInner'); }
+        type: 'Button cleanup', request: 'Remove the pickup button for this wedding version so the quote button is the main action.',
+        logs: ['Reviewing calls-to-action', 'Removing extra pickup button', 'Keeping quote action clear', 'Button cleanup complete'],
+        apply() { extraCta.classList.remove('show'); primaryCta.textContent = 'Request Wedding Catering Quote'; secondaryCta.textContent = 'See Catering Menu'; changed('primaryCta'); }
       },
       {
-        type: 'New page link', request: 'Remove the Catering page link from the header.',
-        logs: ['Opening site navigation', 'Removing Catering page link', 'Checking header width', 'Page link removed'],
-        apply() { newPageLink.hidden = true; changed('siteNav'); }
+        type: 'Add page link', request: 'Add a Gallery page link so customers can see food photos.',
+        logs: ['Opening navigation', 'Adding Gallery page link', 'Checking header spacing', 'Gallery link added'],
+        apply() { galleryPageLink.hidden = false; changed('siteNav'); }
       },
       {
-        type: 'Review', request: 'Remove the customer review from the homepage.',
-        logs: ['Finding review card', 'Removing review from homepage', 'Checking card layout', 'Review removed'],
-        apply() { setVar('--review-display', 'none'); changed('siteInner'); }
+        type: 'Remove old page link', request: 'Remove the Events link because we do not need it anymore.',
+        logs: ['Reviewing navigation links', 'Hiding old Events wording visually', 'Checking menu balance', 'Navigation simplified'],
+        apply() { [...siteNav.querySelectorAll('span')].find(s => s.textContent === 'Events').textContent = 'Services'; changed('siteNav'); }
       },
       {
-        type: 'Logo', request: 'Revert the logo back to the original BBQ mark.',
-        logs: ['Finding logo mark', 'Restoring original initials', 'Checking brand label', 'Logo reverted'],
-        apply() { bizIcon.textContent = 'BBQ'; bizIcon.style.borderRadius = '11px'; businessName.textContent = 'Cedar Hill BBQ Co.'; tagLine.textContent = 'Local family barbecue'; changed('siteInner'); }
+        type: 'Final banner', request: 'Stop the banner from scrolling and make the final message simple.',
+        logs: ['Stopping banner motion', 'Writing simple final message', 'Checking readability', 'Final banner set'],
+        apply() { siteBanner.classList.remove('scrolling'); bannerText.textContent = 'Now booking catering for weddings, office lunches, and family events.'; changed('siteBanner'); }
       },
       {
-        type: 'Featured service + theme', request: 'Feature family pickup packs and match the colors to a friendly blue theme.',
-        logs: ['Updating featured service', 'Matching color theme to pickup packs', 'Checking homepage visual balance', 'Featured service and theme updated'],
-        apply() { serviceText.textContent = 'Family pickup packs and neighborhood catering.'; heroTitle.textContent = 'Real Texas barbecue for busy families.'; heroCopy.textContent = 'Slow-smoked brisket, ribs, and sides made fresh daily. Order pickup, book catering, or stop by for lunch.'; setTheme({bg:'#0b2e67', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#2f86ff,#e3343f)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('serviceCard'); changed('photoCard'); }
+        type: 'Final polish', request: 'Make the finished site feel clean, updated, and ready for customers.',
+        logs: ['Checking spacing and colors', 'Confirming updated hours/services/reviews', 'Making final polish pass', 'Finished website is ready to show'],
+        apply() { setTheme({radius:'24px', surface:'rgba(255,255,255,.92)', cardBg:'rgba(255,255,255,.78)'}); photoTitle.textContent = 'Catering Ready'; photoSub.textContent = 'Weddings • Offices • Family events'; changed('siteInner'); }
       }
     ];
 
@@ -709,6 +735,7 @@
       if (theme.bg) setVar('--site-bg', theme.bg);
       if (theme.accent) setVar('--site-accent', theme.accent);
       if (theme.banner) setVar('--site-banner', theme.banner);
+      if (theme.bannerText) setVar('--site-banner-text', theme.bannerText);
       if (theme.photo) setVar('--photo-gradient', theme.photo);
       if (theme.radius) setVar('--site-radius', theme.radius);
       if (theme.surface) setVar('--site-surface', theme.surface);
@@ -716,25 +743,33 @@
       if (theme.text) setVar('--site-text', theme.text);
       if (theme.muted) setVar('--site-muted', theme.muted);
       if (theme.faint) setVar('--site-faint', theme.faint);
+      if (theme.navText) setVar('--site-nav-text', theme.navText);
+      if (theme.navMuted) setVar('--site-nav-muted', theme.navMuted);
     }
 
     function resetPreviewToNeutral() {
       setTheme({
-        bg: '#64748b',
-        accent: '#1669d8',
-        banner: '#1e293b',
-        photo: 'linear-gradient(135deg,#94a3b8,#334155)',
-        radius: '24px',
-        surface: 'rgba(255,255,255,.90)',
-        cardBg: 'rgba(255,255,255,.74)',
-        text: '#112033',
-        muted: 'rgba(17,32,51,.75)',
-        faint: 'rgba(17,32,51,.55)'
+        bg: '#d7d3c8',
+        accent: '#a8551e',
+        banner: '#f3efe4',
+        bannerText: '#ffffff',
+        photo: 'linear-gradient(135deg,#b7ad9d,#d6c7a1)',
+        radius: '6px',
+        surface: 'rgba(255,255,255,.86)',
+        cardBg: 'rgba(255,255,255,.60)',
+        text: '#7a341f',
+        muted: 'rgba(122,52,31,.68)',
+        faint: 'rgba(122,52,31,.46)',
+        navText: '#ffffff',
+        navMuted: 'rgba(255,255,255,.78)'
       });
       siteBanner.classList.remove('scrolling');
       bannerText.textContent = 'Family platters available all weekend — call ahead.';
       document.querySelector('.site-nav').classList.remove('centered');
       newPageLink.hidden = true;
+      galleryPageLink.hidden = true;
+      const eventLink = [...siteNav.querySelectorAll('span')].find(s => s.textContent === 'Services');
+      if (eventLink) eventLink.textContent = 'Events';
       setVar('--review-display', 'none');
       extraCta.classList.remove('show');
       hoursText.innerHTML = 'Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM';
@@ -743,6 +778,11 @@
       businessName.textContent = 'Cedar Hill BBQ Co.';
       tagLine.textContent = 'Local family barbecue';
       serviceText.textContent = 'Family pickup packs and neighborhood catering.';
+      faqText.textContent = 'Do you cater? Yes — call or request a quote online.';
+      reviewText.textContent = '“Best brisket in town and the staff made catering easy.” — Maria G.';
+      seoText.textContent = 'SEO: BBQ catering in Cedar Hill, TX';
+      leadText.textContent = 'Lead form: Name, phone, event date';
+      kicker.textContent = 'Fresh smoke. Local flavor.';
       heroTitle.textContent = 'Real Texas barbecue for busy families.';
       heroCopy.textContent = 'Slow-smoked brisket, ribs, and sides made fresh daily. Order pickup, book catering, or stop by for lunch.';
       primaryCta.textContent = 'Order Pickup';
