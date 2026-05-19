@@ -305,7 +305,7 @@
       top: 0;
       width: min(680px, calc(100% - 62px));
       transform: scale(1);
-      transform-origin: top left;
+      box-sizing: border-box;
       border: 2px solid rgba(47,134,255,.72);
       border-radius: 28px;
       background:
@@ -320,7 +320,7 @@
     }
 
     .floating-request.show { opacity: 1; }
-    .floating-request.submitting { box-shadow: 0 18px 58px rgba(47,134,255,.38), 0 0 0 8px rgba(71,233,139,.14); }
+    .floating-request.fading { opacity: 0; transform: scale(.98); }
 
     .floating-request-label {
       display: flex;
@@ -347,13 +347,13 @@
 
     .floating-request-text {
       min-height: 74px;
-      display: flex;
-      align-items: center;
+      display: block;
       color: #061223;
       font-size: clamp(1.32rem, 2.55vw, 2.15rem);
       line-height: 1.12;
       font-weight: 900;
       letter-spacing: -.045em;
+      overflow-wrap: anywhere;
     }
 
     .floating-request.shrink .floating-request-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -549,7 +549,7 @@
     @media (max-width: 1100px) {
       .headline, .demo-stage { grid-template-columns: 1fr; }
       .assistant-panel, .website-frame { min-height: auto; }
-      .website-frame { min-height: 680px; }
+      .website-frame { min-height: 680px; order: -1; }
       .site-hero { grid-template-columns: 1fr; }
       .phone-preview { display: none; }
     }
@@ -562,7 +562,9 @@
       .site-hero { padding: 24px 20px; }
       .site-grid { grid-template-columns: 1fr; padding: 0 20px 20px; }
       .floating-request { padding: 14px; border-radius: 22px; }
-      .floating-request-text { min-height: 58px; font-size: 1.08rem; }
+      .floating-request-label { font-size: 10px; }
+      .floating-request-kbd { display: none; }
+      .floating-request-text { min-height: 58px; font-size: .98rem; line-height: 1.16; }
       .controls { justify-content: flex-start; }
     }
   </style>
@@ -889,12 +891,15 @@
     function placeFloatingRequestOverWebsite() {
       const frame = document.querySelector('.website-frame').getBoundingClientRect();
       const viewportPad = 18;
-      const maxVisibleWidth = window.innerWidth - viewportPad * 2;
-      const width = Math.min(680, Math.max(300, frame.width - 62), maxVisibleWidth);
-      const rawLeft = frame.left + (frame.width - width) / 2;
+      const viewportWidth = Math.min(window.visualViewport?.width || window.innerWidth, document.documentElement.clientWidth || window.innerWidth, window.innerWidth);
+      const viewportHeight = Math.min(window.visualViewport?.height || window.innerHeight, document.documentElement.clientHeight || window.innerHeight, window.innerHeight);
+      const isNarrow = viewportWidth <= 720;
+      const maxVisibleWidth = viewportWidth - viewportPad * 2;
+      const width = isNarrow ? maxVisibleWidth : Math.min(680, Math.max(300, frame.width - 62), maxVisibleWidth);
+      const rawLeft = isNarrow ? viewportPad : frame.left + (frame.width - width) / 2;
       const rawTop = frame.top + Math.min(148, Math.max(86, frame.height * .17));
-      const left = Math.max(viewportPad, Math.min(rawLeft, window.innerWidth - width - viewportPad));
-      const top = Math.max(96, Math.min(rawTop, window.innerHeight - 230));
+      const left = Math.max(viewportPad, Math.min(rawLeft, viewportWidth - width - viewportPad));
+      const top = Math.max(96, Math.min(rawTop, viewportHeight - 230));
       floatingRequest.style.left = `${left}px`;
       floatingRequest.style.top = `${top}px`;
       floatingRequest.style.width = `${width}px`;
@@ -902,7 +907,7 @@
     }
 
     function resetFloatingRequest() {
-      floatingRequest.classList.remove('show', 'submitting', 'shrink');
+      floatingRequest.classList.remove('show', 'fading', 'submitting', 'shrink');
       floatingRequest.style.transition = '';
       placeFloatingRequestOverWebsite();
       floatingRequestText.textContent = 'Typing request…';
@@ -928,24 +933,16 @@
       }, delay(180));
     }
 
-    function flyRequestToComposer(text, done) {
-      const from = floatingRequest.getBoundingClientRect();
-      const to = composerText.getBoundingClientRect();
-      const scale = Math.max(.16, Math.min(.28, to.width / from.width));
-      const dx = to.left - from.left;
-      const dy = to.top - from.top;
-      floatingRequest.classList.add('submitting', 'shrink');
-      floatingRequestText.textContent = text;
-      floatingRequest.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-      composerText.textContent = 'Sending request…';
+    function fadeFloatingRequest(done) {
+      floatingRequest.classList.add('fading');
+      composerText.textContent = 'Request received. Processing…';
       wait(() => {
-        composerText.textContent = text;
         floatingRequest.classList.remove('show');
         wait(() => {
           resetFloatingRequest();
           if (done) done();
-        }, delay(160));
-      }, delay(1380));
+        }, delay(120));
+      }, delay(620));
     }
 
     function renderProgress() {
@@ -965,12 +962,12 @@
 
       typeFloatingRequest(step.request, () => {
         wait(() => {
-          flyRequestToComposer(step.request, () => {
+          fadeFloatingRequest(() => {
             addBubble(step.request, 'customer');
             composerText.textContent = 'Request sent';
           });
-        }, delay(900));
-        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(3300));
+        }, delay(2200));
+        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(2200));
         wait(() => {
           messages.appendChild(commandLog);
           step.logs.forEach((line, i) => {
@@ -981,12 +978,12 @@
               commandLog.appendChild(div);
             }, delay(i * 430));
           });
-        }, delay(3780));
+        }, delay(2700));
         wait(() => {
           step.apply();
           addBubble('<strong>Done.</strong> The website has been updated. Refresh the phone view and it matches the request.', 'agent');
-        }, delay(5900));
-        if (playing) wait(nextStep, delay(9000));
+        }, delay(4800));
+        if (playing) wait(nextStep, delay(7600));
       });
     }
 
