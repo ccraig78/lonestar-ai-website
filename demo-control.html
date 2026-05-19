@@ -168,6 +168,7 @@
       grid-template-columns: minmax(400px, .88fr) minmax(600px, 1.35fr);
       gap: 18px;
       align-items: stretch;
+      position: relative;
     }
 
     .assistant-panel, .website-frame {
@@ -293,7 +294,70 @@
       background: #06101d;
       display: flex;
       flex-direction: column;
+      position: relative;
     }
+
+
+    .floating-request {
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: min(680px, calc(100% - 62px));
+      transform: scale(1);
+      transform-origin: top left;
+      border: 2px solid rgba(47,134,255,.72);
+      border-radius: 28px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98), rgba(235,244,255,.96)),
+        rgba(255,255,255,.96);
+      color: #071527;
+      box-shadow: 0 34px 90px rgba(0,0,0,.46), 0 0 0 8px rgba(47,134,255,.12);
+      padding: 18px 18px 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 1.05s cubic-bezier(.18,.82,.18,1), opacity .28s ease, box-shadow .45s ease;
+    }
+
+    .floating-request.show { opacity: 1; }
+    .floating-request.submitting { box-shadow: 0 18px 58px rgba(47,134,255,.38), 0 0 0 8px rgba(71,233,139,.14); }
+
+    .floating-request-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #1669d8;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .floating-request-kbd {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--red));
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 11px;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    .floating-request-text {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      color: #061223;
+      font-size: clamp(1.32rem, 2.55vw, 2.15rem);
+      line-height: 1.12;
+      font-weight: 900;
+      letter-spacing: -.045em;
+    }
+
+    .floating-request.shrink .floating-request-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .floating-request .typing { border-right-color: #1669d8; }
 
     .browser-bar {
       padding: 13px 16px;
@@ -497,6 +561,8 @@
       .site-nav nav { display: none; }
       .site-hero { padding: 24px 20px; }
       .site-grid { grid-template-columns: 1fr; padding: 0 20px 20px; }
+      .floating-request { padding: 14px; border-radius: 22px; }
+      .floating-request-text { min-height: 58px; font-size: 1.08rem; }
       .controls { justify-content: flex-start; }
     }
   </style>
@@ -546,6 +612,10 @@
         <div class="browser-bar">
           <div class="traffic"><span></span><span></span><span></span></div>
           <div class="url">https://demo.lonestaraiassistants.com/local-shop</div>
+        </div>
+        <div class="floating-request" id="floatingRequest" aria-hidden="true">
+          <div class="floating-request-label"><span>Customer types this request</span><span class="floating-request-kbd">Enter ↵</span></div>
+          <div class="floating-request-text" id="floatingRequestText">Typing request…</div>
         </div>
         <div class="site" id="site">
           <div class="site-inner" id="siteInner">
@@ -712,6 +782,9 @@
     const commandLog = document.createElement('div');
     commandLog.className = 'command-log';
     const composerText = $('composerText');
+    const floatingRequest = $('floatingRequest');
+    const floatingRequestText = $('floatingRequestText');
+    document.body.appendChild(floatingRequest);
     const runBadge = $('runBadge');
     const progressStrip = $('progressStrip');
     const playPause = $('playPause');
@@ -813,19 +886,66 @@
       return b;
     }
 
-    function typeComposer(text, done) {
-      composerText.textContent = '';
-      let i = 0;
-      function tick() {
-        composerText.innerHTML = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
-        i += 2;
-        if (i <= text.length + 2) wait(tick, delay(22));
-        else {
-          composerText.textContent = text;
-          if (done) done();
+    function placeFloatingRequestOverWebsite() {
+      const frame = document.querySelector('.website-frame').getBoundingClientRect();
+      const viewportPad = 18;
+      const maxVisibleWidth = window.innerWidth - viewportPad * 2;
+      const width = Math.min(680, Math.max(300, frame.width - 62), maxVisibleWidth);
+      const rawLeft = frame.left + (frame.width - width) / 2;
+      const rawTop = frame.top + Math.min(148, Math.max(86, frame.height * .17));
+      const left = Math.max(viewportPad, Math.min(rawLeft, window.innerWidth - width - viewportPad));
+      const top = Math.max(96, Math.min(rawTop, window.innerHeight - 230));
+      floatingRequest.style.left = `${left}px`;
+      floatingRequest.style.top = `${top}px`;
+      floatingRequest.style.width = `${width}px`;
+      floatingRequest.style.transform = 'scale(1)';
+    }
+
+    function resetFloatingRequest() {
+      floatingRequest.classList.remove('show', 'submitting', 'shrink');
+      floatingRequest.style.transition = '';
+      placeFloatingRequestOverWebsite();
+      floatingRequestText.textContent = 'Typing request…';
+    }
+
+    function typeFloatingRequest(text, done) {
+      resetFloatingRequest();
+      composerText.textContent = 'Watch the customer request on the website →';
+      wait(() => {
+        floatingRequest.classList.add('show');
+        floatingRequestText.textContent = '';
+        let i = 0;
+        function tick() {
+          floatingRequestText.innerHTML = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
+          i += 2;
+          if (i <= text.length + 2) wait(tick, delay(28));
+          else {
+            floatingRequestText.textContent = text;
+            if (done) done();
+          }
         }
-      }
-      tick();
+        tick();
+      }, delay(180));
+    }
+
+    function flyRequestToComposer(text, done) {
+      const from = floatingRequest.getBoundingClientRect();
+      const to = composerText.getBoundingClientRect();
+      const scale = Math.max(.16, Math.min(.28, to.width / from.width));
+      const dx = to.left - from.left;
+      const dy = to.top - from.top;
+      floatingRequest.classList.add('submitting', 'shrink');
+      floatingRequestText.textContent = text;
+      floatingRequest.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      composerText.textContent = 'Sending request…';
+      wait(() => {
+        composerText.textContent = text;
+        floatingRequest.classList.remove('show');
+        wait(() => {
+          resetFloatingRequest();
+          if (done) done();
+        }, delay(160));
+      }, delay(1380));
     }
 
     function renderProgress() {
@@ -840,14 +960,17 @@
       renderProgress();
       messages.innerHTML = '';
       commandLog.innerHTML = '';
-      composerText.textContent = 'Typing request…';
+      resetFloatingRequest();
+      composerText.textContent = 'Watch the customer request on the website →';
 
-      typeComposer(step.request, () => {
+      typeFloatingRequest(step.request, () => {
         wait(() => {
-          addBubble(step.request, 'customer');
-          composerText.textContent = 'Request sent';
-        }, delay(160));
-        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(760));
+          flyRequestToComposer(step.request, () => {
+            addBubble(step.request, 'customer');
+            composerText.textContent = 'Request sent';
+          });
+        }, delay(900));
+        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(3300));
         wait(() => {
           messages.appendChild(commandLog);
           step.logs.forEach((line, i) => {
@@ -858,12 +981,12 @@
               commandLog.appendChild(div);
             }, delay(i * 430));
           });
-        }, delay(1250));
+        }, delay(3780));
         wait(() => {
           step.apply();
           addBubble('<strong>Done.</strong> The website has been updated. Refresh the phone view and it matches the request.', 'agent');
-        }, delay(3200));
-        if (playing) wait(nextStep, delay(6000));
+        }, delay(5900));
+        if (playing) wait(nextStep, delay(9000));
       });
     }
 
@@ -881,6 +1004,7 @@
     nextBtn.addEventListener('click', () => { nextStep(); });
     restartBtn.addEventListener('click', () => { index = 0; playing = true; playPause.textContent = 'Pause demo'; renderStep(); });
     sendBtn.addEventListener('click', () => { nextStep(); });
+    window.addEventListener('resize', () => { if (!floatingRequest.classList.contains('submitting')) placeFloatingRequestOverWebsite(); });
 
     renderStep();
   </script>
