@@ -1,45 +1,45 @@
 const painPoints = {
   repeat: {
-    label: 'Useful workflow example',
-    title: 'FAQ Assistant',
-    copy: 'Answers common customer questions from approved business info, then points people toward the right next step.',
-    price: 'Included in the AI Advantage Package — starting at $1,997',
-    note: 'A simple one-workflow setup can still start at $497 when a smaller first step fits better.',
-    customer: 'Are you open Saturday, and what do I need to send to get started?',
-    assistant: 'Yes — Saturday hours are 9:00 AM to 1:00 PM. To get started, please send your name, phone number, what you need help with, and 2–3 photos if photos would help the owner review it.',
-    owner: 'Customer asked about Saturday hours and how to get started. Assistant answered the hours, requested contact info, and asked for helpful photos before owner review.'
+    label: 'Best fit when your site is hard to update',
+    title: 'Website Update Assistant',
+    copy: 'Helps turn plain-English requests into owner-approved website changes: hours, services, specials, photos, page copy, and FAQs.',
+    price: 'Included in the Website Control Package — starting at $1,997',
+    note: 'A smaller focused setup can still start at $497 when you only need one website-control improvement first.',
+    customer: 'Can you change our Saturday hours and add a spring special to the homepage?',
+    assistant: 'Yes — I can help draft the hours update, homepage special, and mobile-friendly wording for owner approval before it goes live.',
+    owner: 'Website update request captured: Saturday hours, spring special, homepage placement, and approval needed before publishing.'
   },
   details: {
-    label: 'Best fit when leads are vague',
-    title: 'Lead Intake Assistant',
-    copy: 'Collects the details the owner needs before calling back: name, phone, service need, photos, location, timeline, and missing information.',
-    price: 'Included in the AI Advantage Package — starting at $1,997',
-    note: 'Bundled with FAQ, callback help, website chat, drafts, owner summaries, training, and one tune-up.',
-    customer: 'Can I get a price on this job?',
-    assistant: 'I can help the owner review it faster. What service do you need, what city are you in, when do you need it done, and can you send 2–3 photos? Please include your name and best callback number too.',
-    owner: 'Price request captured with service type, city, timing, photos requested, name, and callback number — fewer missing details before the owner responds.'
+    label: 'Best fit when website leads are vague',
+    title: 'Website Lead Capture Assistant',
+    copy: 'Turns website visitors into clearer requests by asking for name, phone/email, service need, timeline, location, photos, or other details the owner needs.',
+    price: 'Included in the Website Control Package — starting at $1,997',
+    note: 'Bundled with website updates, FAQ/business info, local SEO help, owner summaries, training, and one tune-up.',
+    customer: 'Can I get a price for this job?',
+    assistant: 'I can help the owner review it faster. What service do you need, what city are you in, when do you need it done, and what is the best callback number?',
+    owner: 'Website lead captured with service type, city, timing, and callback number — fewer missing details before the owner responds.'
   },
   reply: {
-    label: 'Good first step for missed calls',
-    title: 'Callback Request Helper',
-    copy: 'Collects missed-call details, urgency, reason for calling, and best callback time so the owner can respond without losing the lead.',
-    price: 'Included in the AI Advantage Package — starting at $1,997',
-    note: 'For launch, the practical first step is website chat and callback-request capture. Full AI receptionist service is not offered at launch.',
-    customer: 'My phone rings constantly and I miss real customers. Can AI help?',
-    assistant: 'Yes. The assistant can collect name, number, reason for calling, urgency, and best callback time, then send the owner a clean summary instead of letting the opportunity disappear.',
-    owner: 'Missed-call lead captured: customer contact info, reason for calling, urgency, and callback timing are organized for owner follow-up.'
+    label: 'Best fit for repeat website questions',
+    title: 'Website FAQ Assistant',
+    copy: 'Answers common website questions from approved business info, then routes unsure or sensitive questions to the owner instead of guessing.',
+    price: 'Included in the Website Control Package — starting at $1,997',
+    note: 'For launch, this works best as website chat/FAQ support with owner-approved information and clear escalation rules.',
+    customer: 'Are you open Saturday, and do I need an appointment?',
+    assistant: 'Yes — Saturday hours are 9:00 AM to 1:00 PM. Appointments are recommended for faster service. I can collect your name and best contact number for the owner.',
+    owner: 'FAQ interaction captured: customer asked about Saturday hours and appointments; assistant answered approved info and offered to collect contact details.'
   },
   followup: {
-    label: 'Best for owner organization',
-    title: 'Follow-Up Helper',
-    copy: 'Drafts polite follow-up messages and helps organize which leads, quotes, and open opportunities need attention.',
-    price: 'Included in the AI Advantage Package — starting at $1,997',
-    note: 'Best when combined with lead tracking, owner summaries, and draft-based follow-up workflows.',
-    customer: 'I got a quote last week but I still have a question before I decide.',
-    assistant: 'No problem. What name was the quote under, what question do you have, and what is the best phone or email for the owner to follow up? I’ll summarize it clearly for review.',
-    owner: 'Follow-up needed on prior quote. Assistant captured the quote name, customer question, and best contact method so the owner can reply without digging through old messages.'
+    label: 'Best fit for Google/search clarity',
+    title: 'Local SEO Improvement Assistant',
+    copy: 'Reviews local search opportunities and drafts service-page, FAQ, title/meta, internal-link, and Google Business Profile recommendations with honest expectations.',
+    price: 'Included in the Website Control Package — starting at $1,997',
+    note: 'SEO help improves website content and structure, but LoneStar does not guarantee a #1 ranking.',
+    customer: 'Can you help us show up better for brake repair near Oak Cliff?',
+    assistant: 'Yes — I can suggest clearer service-page wording, FAQs, page title/description ideas, and local signals that help customers and Google understand the service area.',
+    owner: 'SEO improvement idea captured: brake repair near Oak Cliff, service-page copy, FAQ opportunities, and local metadata recommendations.'
   }
-};
+}
 
 function setPainPoint(key) {
   const data = painPoints[key] || painPoints.repeat;
@@ -77,7 +77,7 @@ document.querySelector('[data-lead-form]')?.addEventListener('submit', (event) =
   const form = event.currentTarget;
   const data = new FormData(form);
   const lines = [
-    'LoneStar AI demo request',
+    'LoneStar AI website control demo request',
     '',
     `Name: ${data.get('name') || ''}`,
     `Business: ${data.get('business') || ''}`,
@@ -85,13 +85,13 @@ document.querySelector('[data-lead-form]')?.addEventListener('submit', (event) =
     `Phone: ${data.get('phone') || ''}`,
     `Need: ${data.get('need') || ''}`,
     '',
-    'What customers ask / notes:',
+    'Website changes or notes:',
     `${data.get('notes') || ''}`,
     '',
     'Website assistant lead context:',
     `${sessionStorage.getItem('lonestarChatLead') || 'No website assistant questions captured in this session.'}`
   ];
-  const subject = encodeURIComponent('LoneStar AI demo request');
+  const subject = encodeURIComponent('LoneStar AI website control demo request');
   const body = encodeURIComponent(lines.join('\n'));
   window.location.href = `mailto:hello@lonestaraiassistants.com?subject=${subject}&body=${body}`;
 });
@@ -170,9 +170,9 @@ const featureMatches = [
     summary: 'turns customer inquiries into clean lead tracker rows with source, status, notes, and next step.'
   },
   {
-    feature: 'Website Content Update Assistant',
-    triggers: ['update website', 'website copy', 'site content', 'change my website', 'service page', 'homepage copy', 'web content'],
-    summary: 'drafts owner-approved website copy updates for services, FAQs, contact pages, and landing pages before publishing.'
+    feature: 'Website Control / Update Assistant',
+    triggers: ['update website', 'website copy', 'site content', 'change my website', 'change website', 'website by text', 'text my website', 'website control', 'control my website', 'site control', 'service page', 'homepage copy', 'web content', 'hours', 'specials', 'photos'],
+    summary: 'turns plain-English website requests into owner-approved updates for services, hours, specials, FAQs, contact pages, and landing pages before publishing.'
   },
   {
     feature: 'Social Media Draft Assistant',
@@ -246,7 +246,7 @@ const featureMatches = [
     summary: 'summarizes leads, follow-ups, appointments, website activity, priorities, and data gaps into an owner-ready report.'
   },
   {
-    feature: 'Local SEO / Service Page Assistant',
+    feature: 'Website SEO / Service Page Assistant',
     triggers: ['seo', 'local seo', 'google search', 'rank on google', 'service page', 'near me', 'google business profile', 'gbp', 'meta title'],
     summary: 'reviews local search opportunities and drafts service-page, FAQ, title/meta, internal-link, and Google Business Profile recommendations.'
   }
@@ -317,8 +317,8 @@ function matchFeature(question) {
 
   if (scored[0]?.score > 0) return scored[0];
   return {
-    feature: 'Customer FAQ Assistant',
-    summary: 'is the most practical first match when a visitor asks a broad question because it answers approved common questions and escalates anything uncertain.'
+    feature: 'Website Control / Update Assistant',
+    summary: 'is the best starting point for most owners because it turns plain-English website requests into owner-approved updates and helps keep the site current.'
   };
 }
 
@@ -422,7 +422,7 @@ function captureGuideInteraction({ question, answer, match, leadMeta }) {
 }
 
 function pricingReply() {
-  return 'The recommended LoneStar offer is the Small Business AI Advantage Package, starting at $1,997. It bundles practical starter workflows like FAQ/business info, website chat, lead intake, callback requests, reply drafts, review/social/SEO drafts, owner summaries, training, and one tune-up. Monthly Assistant Care starts at $247/month for support and improvements. Very small one-workflow setups can still start at $497 when that fits better. Hosting, AI provider usage, SMS/phone, and advanced integrations are reviewed before launch so there are no surprise tech costs.';
+  return 'The recommended LoneStar offer is the Small Business Website Control Package, starting at $1,997. It helps small business owners take control of their website with plain-English update requests, website improvements, FAQ/business info, lead capture, local SEO help, owner summaries, training, and one tune-up. Monthly Website Control Care starts at $247/month for ongoing access to the update assistant/service, light updates, troubleshooting, and content/SEO tune-ups. Very small focused setups can still start at $497 when that fits better. Major redesigns, hosting needs, AI provider usage, SMS/phone, and deep integrations are reviewed before launch so there are no surprise tech costs. SEO help improves content and structure, but nobody can honestly guarantee a #1 Google ranking.';
 }
 
 function buildGuideResponse(question) {
@@ -435,8 +435,8 @@ function buildGuideResponse(question) {
 
   const match = matchFeature(question);
   const answer = match.status === 'coming-soon'
-    ? `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar can start with practical website chat, FAQ, lead intake, and callback-request capture so the owner stays in control.`
-    : `${contextLeadIn()} best practical workflow match: ${match.feature}. It ${match.summary}`;
+    ? `${contextLeadIn()} best future match: ${match.feature}. It ${match.summary} For launch, LoneStar starts with practical website control: update requests, website chat, FAQs, lead capture, and local SEO improvements while the owner stays in control.`
+    : `${contextLeadIn()} best website-control match: ${match.feature}. It ${match.summary}`;
   return { match, answer };
 }
 
@@ -445,7 +445,7 @@ function addFollowUpNudge(answer, leadMeta) {
     return `${answer}\n\nThanks — I’ll pass this to LoneStar AI so Clint can review it and follow up if appropriate. You can also reach LoneStar AI at hello@lonestaraiassistants.com or call/text 214-470-8099 if you want to move faster.`;
   }
   if (!leadMeta.context.contact && leadMeta.intentLevel !== 'Support/noise/spam') {
-    return `${answer}\n\nIf you want a practical recommendation for your business, leave your name and phone or email and check the follow-up box.`;
+    return `${answer}\n\nIf you want a practical website-control recommendation for your business, leave your name and phone or email and check the follow-up box.`;
   }
   return answer;
 }

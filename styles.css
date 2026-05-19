@@ -579,10 +579,10 @@ main > section { position: relative; z-index: 1; }
 
 @media (max-width: 620px) {
   .section-pad { padding: 42px 18px; }
-  .site-header { padding: 10px 16px; gap: 12px; }
-  .brand { font-size: 1.03rem; gap: 8px; }
-  .brand img { width: 42px; height: 42px; }
-  .menu-toggle { display: flex; margin-left: auto; }
+  .site-header { padding: 10px 16px; gap: 12px; max-width: 100vw; overflow: visible; }
+  .brand { font-size: 1.03rem; gap: 8px; min-width: 0; flex-shrink: 1; }
+  .brand img { width: 42px; height: 42px; flex: 0 0 42px; }
+  .menu-toggle { display: flex; margin-left: auto; flex: 0 0 46px; }
   .site-header nav {
     position: absolute;
     top: calc(100% + 8px);
@@ -641,6 +641,14 @@ main > section { position: relative; z-index: 1; }
   .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
   .hero-chat .business-context input, .hero-chat .chat-form input { padding: 11px; }
   .hero-chat .business-context { grid-template-columns: 1fr; }
+  .hero-chat .consent-field {
+    display: grid !important;
+    grid-template-columns: 20px minmax(0, 1fr) !important;
+    align-items: start;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  .hero-chat .consent-field input { margin-top: 3px; }
   .site-chat { padding: 14px; border-radius: 20px; }
   .chat-window { min-height: 260px; max-height: 330px; padding: 12px; }
   .hero-chat .chat-window { min-height: 188px; max-height: 250px; }
