@@ -423,7 +423,7 @@ function buildGuideResponse(question) {
 
 function addFollowUpNudge(answer, leadMeta) {
   if (leadMeta.intentLevel === 'Lead — follow up now') {
-    return `${answer}\n\nThanks — I’ll save this for LoneStar to review. Clint can follow up, and you can also call or text 214-470-8099 if you want to move faster.`;
+    return `${answer}\n\nThanks — I’ll save this for LoneStar to review. Clint can follow up, and you can also email hello@lonestaraiassistants.com or call/text 214-470-8099 if you want to move faster.`;
   }
   if (!leadMeta.context.contact && leadMeta.intentLevel !== 'Support/noise/spam') {
     return `${answer}\n\nIf you want a practical recommendation for your business, leave your name and phone or email and check the follow-up box.`;
