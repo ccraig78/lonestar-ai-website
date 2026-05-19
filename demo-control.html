@@ -23,6 +23,11 @@
       --site-accent: #2f86ff;
       --site-banner: #e3343f;
       --site-banner-text: #fff;
+      --site-surface: rgba(255,255,255,.88);
+      --site-card-bg: rgba(255,255,255,.72);
+      --site-muted: rgba(17,32,51,.75);
+      --site-faint: rgba(17,32,51,.55);
+      --review-display: none;
       --site-radius: 24px;
     }
 
@@ -315,7 +320,7 @@
       min-height: 100%;
       border-radius: var(--site-radius);
       overflow: hidden;
-      background: rgba(255,255,255,.88);
+      background: var(--site-surface);
       box-shadow: 0 26px 70px rgba(0,0,0,.22);
       display: grid;
       grid-template-rows: auto auto 1fr auto;
@@ -333,8 +338,12 @@
     }
 
     .biz-logo { display: flex; align-items: center; gap: 10px; font-weight: 950; letter-spacing: -.04em; }
-    .biz-logo span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--site-accent); transition: background .5s ease; }
-    .site-nav nav { display: flex; gap: 15px; color: rgba(17,32,51,.72); font-size: 14px; font-weight: 700; }
+    .biz-logo span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--site-accent); transition: background .5s ease, border-radius .5s ease; }
+    .site-nav nav { display: flex; gap: 15px; color: var(--site-muted); font-size: 14px; font-weight: 700; transition: color .5s ease; }
+    .site-nav nav span { transition: color .35s ease, transform .35s ease; }
+    .site-nav.centered { flex-direction: column; justify-content: center; text-align: center; }
+    .site-nav.centered nav { justify-content: center; flex-wrap: wrap; }
+    .site-nav.centered .biz-logo { flex-direction: column; gap: 7px; }
 
     .site-alert {
       background: var(--site-banner);
@@ -345,7 +354,11 @@
       text-align: center;
       font-weight: 900;
       transition: background .5s ease, color .5s ease;
+      overflow: hidden;
+      position: relative;
     }
+    .site-alert .alert-inner { display: inline-block; white-space: nowrap; }
+    .site-alert.scrolling .alert-inner { animation: scrollBanner 9s linear infinite; }
 
     .site-hero {
       padding: 34px 34px 26px;
@@ -357,10 +370,12 @@
 
     .site-kicker { color: var(--site-accent); font-weight: 950; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; margin-bottom: 10px; transition: color .5s ease; }
     .site h2 { font-size: clamp(2rem, 3vw, 3.4rem); line-height: .98; letter-spacing: -.07em; margin-bottom: 14px; color: var(--site-text); transition: color .5s ease; }
-    .site-copy { color: rgba(17,32,51,.75); line-height: 1.55; max-width: 560px; font-size: 16px; }
+    .site-copy { color: var(--site-muted); line-height: 1.55; max-width: 560px; font-size: 16px; transition: color .5s ease; }
     .site-actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 20px; }
     .site-btn { background: var(--site-accent); color: white; border-radius: 999px; padding: 11px 14px; font-weight: 900; transition: background .5s ease; }
-    .site-btn.ghost { background: rgba(17,32,51,.08); color: var(--site-text); }
+    .site-btn.ghost { background: color-mix(in srgb, var(--site-text) 8%, transparent); color: var(--site-text); }
+    .site-btn.extra { display: none; }
+    .site-btn.extra.show { display: inline-flex; }
 
     .photo-card {
       min-height: 260px;
@@ -388,8 +403,8 @@
     }
 
     .site-card {
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(17,32,51,.08);
+      background: var(--site-card-bg);
+      border: 1px solid color-mix(in srgb, var(--site-text) 10%, transparent);
       border-radius: 18px;
       padding: 17px;
       min-height: 124px;
@@ -397,16 +412,17 @@
     }
     .site-card.changed { animation: pulse .8s ease; border-color: color-mix(in srgb, var(--site-accent) 58%, white); }
     .site-card h3 { font-size: 16px; margin-bottom: 7px; color: var(--site-text); }
-    .site-card p { color: rgba(17,32,51,.7); font-size: 13px; line-height: 1.45; }
+    .site-card p { color: var(--site-muted); font-size: 13px; line-height: 1.45; transition: color .5s ease; }
+    #reviewCard { display: var(--review-display); }
 
     .site-footer {
-      background: rgba(17,32,51,.05);
+      background: color-mix(in srgb, var(--site-text) 6%, transparent);
       padding: 16px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      color: rgba(17,32,51,.7);
+      color: var(--site-muted);
       font-size: 13px;
       font-weight: 750;
     }
@@ -458,6 +474,7 @@
     @keyframes logIn { to { opacity: 1; transform: translateX(0); } }
     @keyframes siteFlash { 0%,100% { filter: brightness(1); } 35% { filter: brightness(1.18) saturate(1.14); } }
     @keyframes pulse { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+    @keyframes scrollBanner { 0% { transform: translateX(92%); } 100% { transform: translateX(-92%); } }
 
     @media (max-width: 1100px) {
       .headline, .demo-stage { grid-template-columns: 1fr; }
@@ -527,10 +544,10 @@
         <div class="site" id="site">
           <div class="site-inner" id="siteInner">
             <header class="site-nav">
-              <div class="biz-logo"><span id="bizIcon">BBQ</span><div><strong id="businessName">Cedar Hill BBQ Co.</strong><small id="tagLine" style="display:block;color:rgba(17,32,51,.55);font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Local family barbecue</small></div></div>
-              <nav><span>Menu</span><span>Events</span><span>Reviews</span><span>Contact</span></nav>
+              <div class="biz-logo"><span id="bizIcon">BBQ</span><div><strong id="businessName">Cedar Hill BBQ Co.</strong><small id="tagLine" style="display:block;color:var(--site-faint);font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Local family barbecue</small></div></div>
+              <nav id="siteNav"><span>Menu</span><span>Events</span><span>Reviews</span><span id="newPageLink" hidden>Catering</span><span>Contact</span></nav>
             </header>
-            <div class="site-alert" id="bannerText">Family platters available all weekend — call ahead.</div>
+            <div class="site-alert" id="siteBanner"><span class="alert-inner" id="bannerText">Family platters available all weekend — call ahead.</span></div>
             <section class="site-hero">
               <div>
                 <div class="site-kicker" id="kicker">Fresh smoke. Local flavor.</div>
@@ -539,6 +556,7 @@
                 <div class="site-actions">
                   <div class="site-btn" id="primaryCta">Order Pickup</div>
                   <div class="site-btn ghost" id="secondaryCta">Ask a Question</div>
+                  <div class="site-btn extra" id="extraCta">Book Catering</div>
                 </div>
               </div>
               <div class="photo-card" id="photoCard"><div><strong id="photoTitle">Smoked Daily</strong><small id="photoSub">Brisket • Ribs • Sausage</small></div></div>
@@ -547,6 +565,7 @@
               <article class="site-card" id="hoursCard"><h3>Hours</h3><p id="hoursText">Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM</p></article>
               <article class="site-card" id="serviceCard"><h3>Featured Service</h3><p id="serviceText">Family pickup packs and neighborhood catering.</p></article>
               <article class="site-card" id="faqCard"><h3>FAQ</h3><p id="faqText">Do you cater? Yes — call or request a quote online.</p></article>
+              <article class="site-card" id="reviewCard"><h3>Review</h3><p id="reviewText">“Best brisket in town and the staff made catering easy.” — Maria G.</p></article>
             </section>
             <footer class="site-footer"><span id="seoText">SEO: BBQ catering in Cedar Hill, TX</span><span id="leadText">Lead form: Name, phone, event date</span></footer>
           </div>
@@ -561,104 +580,104 @@
   <script>
     const steps = [
       {
-        type: 'Background color', request: 'Change the website background to blue and make it feel more modern.',
-        logs: ['Reading current theme tokens', 'Updating background palette to LoneStar blue', 'Checking contrast and mobile readability', 'Publishing blue theme'],
-        apply() { setTheme({bg:'#0b2e67', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#2f86ff,#e3343f)', radius:'24px'}); changed('siteInner'); }
+        type: 'Page color', request: 'Change the page color to dark blue so it feels more like our brand.',
+        logs: ['Reading current page colors', 'Applying dark blue background', 'Checking button and banner contrast', 'Dark blue page color published'],
+        apply() { setTheme({bg:'#082f63', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#0b2e67,#2f86ff 58%,#e3343f)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('siteInner'); }
       },
       {
-        type: 'Business hours', request: 'Change our hours to 9 AM to 6 PM Monday through Saturday.',
-        logs: ['Finding hours section', 'Replacing weekday schedule', 'Checking footer/contact snippets', 'Hours updated'],
+        type: 'Text color', request: 'Make the website text white for a darker, more premium look.',
+        logs: ['Switching site text tokens', 'Darkening card surfaces', 'Checking headline contrast', 'White text mode published'],
+        apply() { setTheme({surface:'rgba(6,18,35,.92)', cardBg:'rgba(255,255,255,.10)', text:'#ffffff', muted:'rgba(255,255,255,.78)', faint:'rgba(255,255,255,.58)', banner:'#1669d8'}); changed('siteInner'); }
+      },
+      {
+        type: 'Banner motion', request: 'Make the announcement banner scroll across the top.',
+        logs: ['Finding announcement banner', 'Adding smooth scroll behavior', 'Checking motion speed', 'Scrolling banner turned on'],
+        apply() { bannerText.textContent = 'Weekend special: family platters, catering trays, and pickup packs available now.'; siteBanner.classList.add('scrolling'); changed('siteBanner'); }
+      },
+      {
+        type: 'Button', request: 'Add a button for catering orders.',
+        logs: ['Finding homepage buttons', 'Adding catering call-to-action', 'Checking mobile wrap', 'New button added'],
+        apply() { extraCta.textContent = 'Book Catering'; extraCta.classList.add('show'); changed('extraCta'); }
+      },
+      {
+        type: 'Hours', request: 'Change the hours to 9 AM to 6 PM Monday through Saturday.',
+        logs: ['Finding hours card', 'Updating weekday schedule', 'Checking footer references', 'Hours changed'],
         apply() { hoursText.innerHTML = 'Mon–Sat 9 AM–6 PM<br>Sunday 11 AM–4 PM'; changed('hoursCard'); }
       },
       {
-        type: 'Seasonal banner', request: 'Add a Christmas catering banner at the top of the site.',
-        logs: ['Creating seasonal banner copy', 'Applying red holiday accent', 'Checking banner on phone preview', 'Christmas banner live'],
-        apply() { bannerText.textContent = 'Christmas catering is open — reserve brisket trays before December 18.'; setVar('--site-banner', '#b81f2d'); setVar('--site-banner-text', '#fff7f7'); changed('bannerText'); }
+        type: 'Header layout', request: 'Change the header layout so the logo is centered above the menu.',
+        logs: ['Reading header layout', 'Centering logo and navigation', 'Checking spacing', 'Header layout updated'],
+        apply() { document.querySelector('.site-nav').classList.add('centered'); changed('siteInner'); }
       },
       {
-        type: 'Hero headline', request: 'Make the homepage headline focus on catering for local events.',
-        logs: ['Reviewing homepage hero', 'Drafting clearer catering headline', 'Updating call-to-action', 'Hero copy published'],
-        apply() { kicker.textContent = 'Catering made easy'; heroTitle.textContent = 'Feed the whole crew without the stress.'; heroCopy.textContent = 'From shop lunches to family parties, Cedar Hill BBQ Co. brings slow-smoked favorites to your event with easy pickup or catering quotes.'; primaryCta.textContent = 'Request Catering Quote'; changed('siteInner'); }
+        type: 'New page link', request: 'Add a Catering page link in the header.',
+        logs: ['Opening site navigation', 'Adding Catering page link', 'Checking header width', 'New page link added'],
+        apply() { newPageLink.hidden = false; changed('siteNav'); }
       },
       {
-        type: 'CTA / phone action', request: 'Make the main button say Text Us for Today’s Specials.',
-        logs: ['Finding primary CTA', 'Updating button label', 'Keeping button mobile-friendly', 'CTA updated'],
-        apply() { primaryCta.textContent = 'Text Us for Today’s Specials'; secondaryCta.textContent = 'View Menu'; changed('primaryCta'); }
+        type: 'Review', request: 'Add a customer review to the homepage.',
+        logs: ['Finding review area', 'Adding approved customer quote', 'Checking card layout', 'Review added'],
+        apply() { setVar('--review-display', 'block'); reviewText.textContent = '“Best brisket in town and the staff made catering easy.” — Maria G.'; changed('reviewCard'); }
       },
       {
-        type: 'New service', request: 'Add office lunch delivery as a service.',
-        logs: ['Adding service card language', 'Checking service hierarchy', 'Adding local-office keywords', 'Service updated'],
-        apply() { serviceText.textContent = 'Office lunch delivery, family pickup packs, and neighborhood catering.'; changed('serviceCard'); }
+        type: 'Logo', request: 'Change the logo to a flame icon for barbecue season.',
+        logs: ['Finding logo mark', 'Swapping icon style', 'Checking header readability', 'Logo updated'],
+        apply() { bizIcon.textContent = '🔥'; bizIcon.style.borderRadius = '999px'; businessName.textContent = 'Cedar Hill Smokehouse'; tagLine.textContent = 'Barbecue • Catering • Pickup'; changed('siteInner'); }
       },
       {
-        type: 'FAQ update', request: 'Add an FAQ that says we need 48 hours notice for catering orders.',
-        logs: ['Opening FAQ content', 'Adding catering notice question', 'Checking plain-English answer', 'FAQ updated'],
-        apply() { faqText.textContent = 'How much notice for catering? Please request catering at least 48 hours ahead.'; changed('faqCard'); }
+        type: 'Featured service + theme', request: 'Feature wedding catering and make the colors feel elegant.',
+        logs: ['Updating featured service', 'Matching color theme to service', 'Checking homepage visual balance', 'Featured service and theme updated'],
+        apply() { serviceText.textContent = 'Wedding catering with smoked meats, sides, and simple serving options.'; heroTitle.textContent = 'Wedding catering with real Texas flavor.'; heroCopy.textContent = 'Give guests a meal they remember with slow-smoked brisket, sausage, sides, and easy catering support.'; setTheme({bg:'#3f2a56', accent:'#9f7aea', banner:'#2d1b42', photo:'linear-gradient(135deg,#2d1b42,#9f7aea 48%,#f6ad55)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.75)', text:'#162033', muted:'rgba(22,32,51,.76)', faint:'rgba(22,32,51,.55)'}); changed('serviceCard'); changed('photoCard'); }
       },
       {
-        type: 'SEO settings', request: 'Help the page target BBQ catering near Cedar Hill and Duncanville.',
-        logs: ['Drafting page title and meta description', 'Adding local service keywords naturally', 'Avoiding spammy SEO stuffing', 'SEO preview updated'],
-        apply() { seoText.textContent = 'SEO: BBQ catering near Cedar Hill & Duncanville, TX'; changed('seoText'); }
+        type: 'Page color', request: 'Change the page color back to a clean gray look.',
+        logs: ['Reading page colors', 'Switching background to clean gray', 'Checking contrast', 'Gray page color published'],
+        apply() { setTheme({bg:'#64748b', accent:'#1669d8', banner:'#1e293b', photo:'linear-gradient(135deg,#94a3b8,#334155)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('siteInner'); }
       },
       {
-        type: 'Photo / visual theme', request: 'Make the photo area feel like a summer cookout.',
-        logs: ['Selecting summer visual direction', 'Updating image placeholder gradient', 'Changing photo caption', 'Visual theme updated'],
-        apply() { setVar('--photo-gradient', 'linear-gradient(135deg,#ffb347,#ff5b61 48%,#2f86ff)'); photoTitle.textContent = 'Summer Cookout'; photoSub.textContent = 'Backyard packs • Cold drinks • Easy pickup'; changed('photoCard'); }
+        type: 'Text color', request: 'Change the text back to dark blue for a lighter page.',
+        logs: ['Restoring dark blue text', 'Lightening card surfaces', 'Checking readability', 'Dark blue text restored'],
+        apply() { setTheme({surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)', banner:'#1669d8'}); changed('siteInner'); }
       },
       {
-        type: 'Lead form', request: 'Add event size to the catering lead form.',
-        logs: ['Finding lead capture fields', 'Adding event size question', 'Checking owner summary output', 'Lead form updated'],
-        apply() { leadText.textContent = 'Lead form: Name, phone, event date, event size'; changed('leadText'); }
+        type: 'Banner motion', request: 'Stop the banner from scrolling and leave it still.',
+        logs: ['Finding announcement banner', 'Removing scroll behavior', 'Setting fixed message', 'Static banner restored'],
+        apply() { siteBanner.classList.remove('scrolling'); bannerText.textContent = 'Summer lunch special: brisket sandwich combo every weekday.'; changed('siteBanner'); }
       },
       {
-        type: 'Background color', request: 'Change the website background to a clean gray look instead.',
-        logs: ['Reading current theme tokens', 'Switching background to clean gray', 'Checking contrast and spacing', 'Gray theme published'],
-        apply() { setTheme({bg:'#64748b', accent:'#1669d8', banner:'#1e293b', photo:'linear-gradient(135deg,#94a3b8,#334155)', radius:'24px'}); changed('siteInner'); }
+        type: 'Button', request: 'Remove the extra catering button.',
+        logs: ['Finding homepage buttons', 'Removing extra call-to-action', 'Checking remaining buttons', 'Extra button removed'],
+        apply() { extraCta.classList.remove('show'); changed('primaryCta'); }
       },
       {
-        type: 'Business hours', request: 'Change our hours to 10 AM to 5 PM Monday through Friday.',
-        logs: ['Finding hours section', 'Replacing weekday schedule', 'Checking footer/contact snippets', 'Hours updated'],
-        apply() { hoursText.innerHTML = 'Mon–Fri 10 AM–5 PM<br>Saturday by request'; changed('hoursCard'); }
+        type: 'Hours', request: 'Revert the hours back to the regular schedule.',
+        logs: ['Finding hours card', 'Restoring regular schedule', 'Checking footer references', 'Hours reverted'],
+        apply() { hoursText.innerHTML = 'Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM'; changed('hoursCard'); }
       },
       {
-        type: 'Seasonal banner', request: 'Swap the Christmas banner for a summer lunch special.',
-        logs: ['Removing holiday banner', 'Writing summer lunch promo', 'Checking banner length on mobile', 'Summer banner live'],
-        apply() { bannerText.textContent = 'Summer lunch special: brisket sandwich combo every weekday.'; setVar('--site-banner', '#1669d8'); setVar('--site-banner-text', '#ffffff'); changed('bannerText'); }
+        type: 'Header layout', request: 'Revert the header layout back to logo left and menu right.',
+        logs: ['Reading header layout', 'Restoring split header', 'Checking spacing', 'Header layout reverted'],
+        apply() { document.querySelector('.site-nav').classList.remove('centered'); changed('siteInner'); }
       },
       {
-        type: 'Hero headline', request: 'Change the homepage headline to focus on fast pickup orders.',
-        logs: ['Reviewing hero content', 'Drafting pickup-first headline', 'Updating supporting copy', 'Hero copy published'],
-        apply() { kicker.textContent = 'Fast pickup. Real barbecue.'; heroTitle.textContent = 'Dinner is ready when you are.'; heroCopy.textContent = 'Order slow-smoked favorites for quick pickup after work, weekend family meals, or last-minute guests.'; primaryCta.textContent = 'Start Pickup Order'; changed('siteInner'); }
+        type: 'New page link', request: 'Remove the Catering page link from the header.',
+        logs: ['Opening site navigation', 'Removing Catering page link', 'Checking header width', 'Page link removed'],
+        apply() { newPageLink.hidden = true; changed('siteNav'); }
       },
       {
-        type: 'CTA / phone action', request: 'Make the main button say Call for Catering.',
-        logs: ['Finding primary CTA', 'Updating button label', 'Checking action wording', 'CTA updated'],
-        apply() { primaryCta.textContent = 'Call for Catering'; secondaryCta.textContent = 'See Hours'; changed('primaryCta'); }
+        type: 'Review', request: 'Remove the customer review from the homepage.',
+        logs: ['Finding review card', 'Removing review from homepage', 'Checking card layout', 'Review removed'],
+        apply() { setVar('--review-display', 'none'); changed('siteInner'); }
       },
       {
-        type: 'New service', request: 'Replace office lunch delivery with wedding catering.',
-        logs: ['Updating service card', 'Adding wedding catering copy', 'Checking tone', 'Service updated'],
-        apply() { serviceText.textContent = 'Wedding catering, family pickup packs, and neighborhood events.'; changed('serviceCard'); }
+        type: 'Logo', request: 'Revert the logo back to the original BBQ mark.',
+        logs: ['Finding logo mark', 'Restoring original initials', 'Checking brand label', 'Logo reverted'],
+        apply() { bizIcon.textContent = 'BBQ'; bizIcon.style.borderRadius = '11px'; businessName.textContent = 'Cedar Hill BBQ Co.'; tagLine.textContent = 'Local family barbecue'; changed('siteInner'); }
       },
       {
-        type: 'FAQ update', request: 'Change the FAQ to answer whether we have gluten-free sides.',
-        logs: ['Opening FAQ content', 'Replacing catering notice FAQ', 'Writing clear answer', 'FAQ updated'],
-        apply() { faqText.textContent = 'Do you have gluten-free sides? Ask our team — options may vary by day.'; changed('faqCard'); }
-      },
-      {
-        type: 'SEO settings', request: 'Change SEO focus to family barbecue pickup in Cedar Hill.',
-        logs: ['Drafting updated SEO title', 'Adjusting local keywords', 'Checking natural wording', 'SEO preview updated'],
-        apply() { seoText.textContent = 'SEO: Family barbecue pickup in Cedar Hill, TX'; changed('seoText'); }
-      },
-      {
-        type: 'Photo / visual theme', request: 'Make the photo area feel more premium and smoky.',
-        logs: ['Selecting smoky visual direction', 'Updating photo placeholder', 'Changing image caption', 'Visual theme updated'],
-        apply() { setVar('--photo-gradient', 'linear-gradient(135deg,#111827,#6b2f1a 55%,#e3343f)'); photoTitle.textContent = 'Premium Smoke'; photoSub.textContent = 'Low and slow • Rich flavor • Local favorite'; changed('photoCard'); }
-      },
-      {
-        type: 'Lead form', request: 'Change the lead form to ask for budget instead of event size.',
-        logs: ['Finding lead capture fields', 'Replacing event size with budget', 'Checking owner summary output', 'Lead form updated'],
-        apply() { leadText.textContent = 'Lead form: Name, phone, event date, budget range'; changed('leadText'); }
+        type: 'Featured service + theme', request: 'Feature family pickup packs and match the colors to a friendly blue theme.',
+        logs: ['Updating featured service', 'Matching color theme to pickup packs', 'Checking homepage visual balance', 'Featured service and theme updated'],
+        apply() { serviceText.textContent = 'Family pickup packs and neighborhood catering.'; heroTitle.textContent = 'Real Texas barbecue for busy families.'; heroCopy.textContent = 'Slow-smoked brisket, ribs, and sides made fresh daily. Order pickup, book catering, or stop by for lunch.'; setTheme({bg:'#0b2e67', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#2f86ff,#e3343f)', surface:'rgba(255,255,255,.90)', cardBg:'rgba(255,255,255,.74)', text:'#112033', muted:'rgba(17,32,51,.75)', faint:'rgba(17,32,51,.55)'}); changed('serviceCard'); changed('photoCard'); }
       }
     ];
 
@@ -692,6 +711,11 @@
       if (theme.banner) setVar('--site-banner', theme.banner);
       if (theme.photo) setVar('--photo-gradient', theme.photo);
       if (theme.radius) setVar('--site-radius', theme.radius);
+      if (theme.surface) setVar('--site-surface', theme.surface);
+      if (theme.cardBg) setVar('--site-card-bg', theme.cardBg);
+      if (theme.text) setVar('--site-text', theme.text);
+      if (theme.muted) setVar('--site-muted', theme.muted);
+      if (theme.faint) setVar('--site-faint', theme.faint);
     }
 
     function changed(id) {
