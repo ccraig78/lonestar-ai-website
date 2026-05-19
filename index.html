@@ -63,29 +63,32 @@
             </div>
           </div>
 
-          <aside class="assistant-card site-chat hero-chat" aria-label="LoneStar AI website assistant">
+          <aside class="assistant-card site-chat hero-chat" aria-label="Stella, the LoneStar AI website assistant">
             <div class="site-chat-header">
               <span class="spark logo-spark"><img src="assets/images/ls-star-rounded-gradient.svg" alt="" aria-hidden="true" /></span>
-              <div><strong>LoneStar AI Guide</strong><small>Ask about leads, FAQs, pricing, or your business</small></div>
+              <div><strong>Stella</strong><small>LoneStar AI website assistant</small></div>
             </div>
             <div class="business-context lead-context">
               <label>Your name <input data-chat-name type="text" placeholder="Jane Smith" /></label>
               <label>Contact <input data-chat-contact type="text" placeholder="phone or email" /></label>
               <label>Business name <input data-chat-business type="text" placeholder="Smith Auto Repair" /></label>
-              <label>Website or industry <input data-chat-industry type="text" placeholder="auto repair or example.com" /></label>
+              <label>Industry <input data-chat-industry type="text" placeholder="auto repair, HVAC, salon..." /></label>
+              <label class="wide-field">Website <input data-chat-website type="text" placeholder="example.com (optional)" /></label>
+              <label class="consent-field"><input data-chat-followup type="checkbox" /> LoneStar AI may follow up about my question.</label>
             </div>
             <div class="quick-prompts hero-prompts" aria-label="Example questions">
               <button type="button" data-chat-prompt="Can you help me with leads?">Leads</button>
-              <button type="button" data-chat-prompt="Can an assistant answer customer questions?">FAQs</button>
+              <button type="button" data-chat-prompt="Can Stella answer customer questions?">FAQs</button>
               <button type="button" data-chat-prompt="How much does it cost?">Pricing</button>
             </div>
             <div class="chat-window" data-chat-window aria-live="polite">
-              <div class="chat-bubble assistant">Hi — tell me your business name or ask what an AI assistant could do for you.</div>
+              <div class="chat-bubble assistant">Hi, I’m Stella. Ask what a practical AI assistant could do for your business, and I’ll match your problem to one good starting workflow.</div>
             </div>
             <form class="chat-form" data-chat-form>
-              <input data-chat-input name="question" autocomplete="off" placeholder="Ask what AI could do..." required />
+              <input data-chat-input name="question" autocomplete="off" placeholder="Ask Stella what AI could do..." required />
               <button type="submit" aria-label="Send question">➜</button>
             </form>
+            <p class="privacy-note">Please don’t share passwords, private customer lists, or sensitive legal/medical/financial details. If you share contact info, LoneStar AI may save it to respond and improve Stella.</p>
           </aside>
         </div>
       </section>

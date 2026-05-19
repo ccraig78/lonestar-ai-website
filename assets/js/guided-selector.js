@@ -126,6 +126,8 @@ const chatName = document.querySelector('[data-chat-name]');
 const chatContact = document.querySelector('[data-chat-contact]');
 const chatBusiness = document.querySelector('[data-chat-business]');
 const chatIndustry = document.querySelector('[data-chat-industry]');
+const chatWebsite = document.querySelector('[data-chat-website]');
+const chatFollowup = document.querySelector('[data-chat-followup]');
 
 const GUIDE_CAPTURE_ENDPOINT = (() => {
   try {
@@ -250,7 +252,7 @@ const featureMatches = [
   }
 ];
 
-const chatLead = { questions: [], matchedFeatures: [] };
+const chatLead = { questions: [], matchedFeatures: [], intentLevels: [] };
 
 function addChatBubble(message, role = 'assistant') {
   if (!chatWindow) return;
@@ -266,7 +268,9 @@ function prospectContext() {
     name: chatName?.value.trim() || '',
     contact: chatContact?.value.trim() || '',
     business: chatBusiness?.value.trim() || '',
-    industry: chatIndustry?.value.trim() || ''
+    industry: chatIndustry?.value.trim() || '',
+    website: chatWebsite?.value.trim() || '',
+    permissionToFollowUp: Boolean(chatFollowup?.checked)
   };
 }
 
@@ -299,34 +303,92 @@ function matchFeature(question) {
   };
 }
 
-function rememberInteraction(question, feature) {
+function classifyIntent(question, match, context) {
+  const q = question.toLowerCase();
+  const hasContact = Boolean(context.contact || context.name);
+  const askedForHelp = /demo|call|contact|help me|talk|hire|start|setup|set up|quote|price|pricing|cost|interested|follow up|consult|review/.test(q);
+  const spam = /crypto|casino|porn|loan|backlink|seo spam|viagra/.test(q);
+  const contentGap = /how does|what happens|included|not included|privacy|data|wrong|mistake|contract|cancel|timeline|how long/.test(q);
+  const featureSignal = match?.status === 'coming-soon' || /phone|sms|crm|payment|schedule|calendar|integration|voice|dashboard|automation/.test(q);
+
+  if (spam) return 'Support/noise/spam';
+  if (hasContact && (context.permissionToFollowUp || askedForHelp)) return 'Lead — follow up now';
+  if (featureSignal) return 'Feature signal';
+  if (contentGap) return 'FAQ/content gap';
+  if (askedForHelp || context.business || context.website) return 'Warm interest — review soon';
+  return 'Warm interest — review soon';
+}
+
+function followUpStatusFor(intentLevel, context) {
+  if (intentLevel === 'Support/noise/spam') return 'spam';
+  if (intentLevel === 'Lead — follow up now') return 'new';
+  if (context.contact || context.name) return 'needs_review';
+  return 'no_contact_info';
+}
+
+function nextActionFor(intentLevel, context) {
+  if (intentLevel === 'Lead — follow up now') return 'Clint/Codi review and follow up.';
+  if (intentLevel === 'FAQ/content gap') return 'Review for website FAQ/copy improvement.';
+  if (intentLevel === 'Feature signal') return 'Review for future offer or add-on signal.';
+  if (context.business || context.website) return 'Review business context; invite contact info if useful.';
+  return 'Include in daily Stella log review.';
+}
+
+function summarizeAnswer(answer) {
+  return String(answer || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+}
+
+function rememberInteraction(question, feature, answer) {
   const context = prospectContext();
+  const intentLevel = classifyIntent(question, feature, context);
   chatLead.name = context.name || chatLead.name || '';
   chatLead.contact = context.contact || chatLead.contact || '';
   chatLead.business = context.business || chatLead.business || '';
   chatLead.industry = context.industry || chatLead.industry || '';
+  chatLead.website = context.website || chatLead.website || '';
+  chatLead.permissionToFollowUp = context.permissionToFollowUp || chatLead.permissionToFollowUp || false;
   chatLead.questions.push(question);
   if (feature?.feature) chatLead.matchedFeatures.push(feature.feature);
+  chatLead.intentLevels.push(intentLevel);
   try {
     sessionStorage.setItem('lonestarChatLead', JSON.stringify(chatLead));
   } catch (_) {}
-  return context;
+  return {
+    context,
+    intentLevel,
+    followUpStatus: followUpStatusFor(intentLevel, context),
+    nextAction: nextActionFor(intentLevel, context),
+    contentGapFlag: intentLevel === 'FAQ/content gap',
+    featureSignalFlag: intentLevel === 'Feature signal',
+    stellaAnswerSummary: summarizeAnswer(answer),
+    assignedTo: intentLevel === 'Lead — follow up now' ? 'Clint/Codi' : 'Codi/Buddy daily review'
+  };
 }
 
-function captureGuideInteraction({ question, answer, match, context }) {
+function captureGuideInteraction({ question, answer, match, leadMeta }) {
   if (!GUIDE_CAPTURE_ENDPOINT) return;
   const payload = {
-    source: 'lonestar-ai-guide',
+    source: 'stella-website-assistant',
+    assistantName: 'Stella',
     sessionId: guideSessionId,
     page: window.location.href,
-    context,
+    context: leadMeta.context,
     question,
     answer,
+    stellaAnswerSummary: leadMeta.stellaAnswerSummary,
     matchedFeature: match?.feature || '',
     matchStatus: match?.status || '',
     matchScore: match?.score || null,
+    intentLevel: leadMeta.intentLevel,
+    permissionToFollowUp: leadMeta.context.permissionToFollowUp,
+    contentGapFlag: leadMeta.contentGapFlag,
+    featureSignalFlag: leadMeta.featureSignalFlag,
+    assignedTo: leadMeta.assignedTo,
+    followUpStatus: leadMeta.followUpStatus,
+    nextAction: leadMeta.nextAction,
     allQuestionsThisSession: chatLead.questions,
     matchedFeaturesThisSession: chatLead.matchedFeatures,
+    intentLevelsThisSession: chatLead.intentLevels,
     userAgent: navigator.userAgent
   };
 
@@ -359,14 +421,26 @@ function buildGuideResponse(question) {
   return { match, answer };
 }
 
+function addFollowUpNudge(answer, leadMeta) {
+  if (leadMeta.intentLevel === 'Lead — follow up now') {
+    return `${answer}\n\nThanks — I’ll save this for LoneStar to review. Clint can follow up, and you can also call or text 214-470-8099 if you want to move faster.`;
+  }
+  if (!leadMeta.context.contact && leadMeta.intentLevel !== 'Support/noise/spam') {
+    return `${answer}\n\nIf you want a practical recommendation for your business, leave your name and phone or email and check the follow-up box.`;
+  }
+  return answer;
+}
+
 function submitChatQuestion(question) {
   const clean = question.trim();
   if (!clean) return;
-  const { match, answer } = buildGuideResponse(clean);
-  const context = rememberInteraction(clean, match);
+  const { match, answer: baseAnswer } = buildGuideResponse(clean);
+  const leadMeta = rememberInteraction(clean, match, baseAnswer);
+  const answer = addFollowUpNudge(baseAnswer, leadMeta);
+  leadMeta.stellaAnswerSummary = summarizeAnswer(answer);
   addChatBubble(clean, 'user');
   addChatBubble(answer, 'assistant');
-  captureGuideInteraction({ question: clean, answer, match, context });
+  captureGuideInteraction({ question: clean, answer, match, leadMeta });
 }
 
 chatForm?.addEventListener('submit', (event) => {
