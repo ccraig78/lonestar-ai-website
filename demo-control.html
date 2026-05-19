@@ -276,7 +276,7 @@
       border-top: 1px solid rgba(255,255,255,.12);
       display: flex;
       gap: 10px;
-      align-items: center;
+      align-items: stretch;
       min-width: 0;
       max-width: 100%;
       box-sizing: border-box;
@@ -287,6 +287,8 @@
     .composer button {
       flex: 0 0 auto;
       white-space: nowrap;
+      align-self: center;
+      min-height: 44px;
     }
 
     .input-look {
@@ -294,16 +296,18 @@
       min-width: 0;
       max-width: 100%;
       box-sizing: border-box;
-      min-height: 44px;
-      border-radius: 999px;
+      min-height: 68px;
+      border-radius: 18px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.08);
-      padding: 12px 15px;
+      padding: 10px 15px;
       color: #dbe8ff;
       font-size: 14px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      line-height: 1.35;
+      overflow: visible;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .website-frame {
