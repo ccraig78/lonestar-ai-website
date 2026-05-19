@@ -377,6 +377,7 @@ p { line-height: 1.58; }
 .chat-bubble { max-width: 86%; padding: 12px 13px; border-radius: 16px; line-height: 1.48; font-size: .96rem; }
 .chat-bubble.assistant { justify-self: start; background: rgba(255,255,255,.10); color: rgba(255,255,255,.82); border-bottom-left-radius: 5px; }
 .chat-bubble.user { justify-self: end; background: linear-gradient(135deg, var(--blue), var(--blue-2)); color: white; border-bottom-right-radius: 5px; }
+.feature-highlight { color: #ff5b61; font-weight: 900; text-shadow: 0 0 16px rgba(227,52,63,.36); }
 .chat-form { display: grid; grid-template-columns: 1fr 44px; gap: 10px; margin-top: 12px; }
 .chat-form button { border: 0; border-radius: 14px; background: linear-gradient(135deg, var(--blue), var(--blue-2)); color: white; font-weight: 950; cursor: pointer; box-shadow: 0 10px 22px rgba(22,105,216,.26); }
 .hero-chat { align-self: center; }

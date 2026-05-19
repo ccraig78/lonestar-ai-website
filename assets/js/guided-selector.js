@@ -254,11 +254,30 @@ const featureMatches = [
 
 const chatLead = { questions: [], matchedFeatures: [], intentLevels: [] };
 
-function addChatBubble(message, role = 'assistant') {
+function appendMessageWithHighlight(node, message, highlightText) {
+  const text = String(message || '');
+  if (!highlightText || !text.includes(highlightText)) {
+    node.textContent = text;
+    return;
+  }
+
+  const parts = text.split(highlightText);
+  parts.forEach((part, index) => {
+    if (part) node.appendChild(document.createTextNode(part));
+    if (index < parts.length - 1) {
+      const highlight = document.createElement('span');
+      highlight.className = 'feature-highlight';
+      highlight.textContent = highlightText;
+      node.appendChild(highlight);
+    }
+  });
+}
+
+function addChatBubble(message, role = 'assistant', options = {}) {
   if (!chatWindow) return;
   const bubble = document.createElement('div');
   bubble.className = `chat-bubble ${role}`;
-  bubble.textContent = message;
+  appendMessageWithHighlight(bubble, message, role === 'assistant' ? options.highlightText : '');
   chatWindow.appendChild(bubble);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
@@ -439,7 +458,8 @@ function submitChatQuestion(question) {
   const answer = addFollowUpNudge(baseAnswer, leadMeta);
   leadMeta.stellaAnswerSummary = summarizeAnswer(answer);
   addChatBubble(clean, 'user');
-  addChatBubble(answer, 'assistant');
+  const highlightText = match?.feature && match.feature !== 'Pricing / Package Question' ? match.feature : '';
+  addChatBubble(answer, 'assistant', { highlightText });
   captureGuideInteraction({ question: clean, answer, match, leadMeta });
 }
 
