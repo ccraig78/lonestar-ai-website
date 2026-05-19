@@ -488,7 +488,7 @@
           <small>Change your website as easily as sending a text</small>
         </div>
       </div>
-      <div class="pill">Auto-runs 20 demo changes in about 2 minutes</div>
+      <div class="pill">Auto-runs 20 demo changes at a slower, easy-to-follow pace</div>
     </header>
 
     <section class="headline">
@@ -676,6 +676,8 @@
     let index = 0;
     let playing = true;
     let timers = [];
+    const DEMO_SPEED = 2; // Clint asked for about half speed: multiply demo delays by 2.
+    const delay = (ms) => ms * DEMO_SPEED;
 
     for (let i = 0; i < steps.length; i++) {
       const tick = document.createElement('div');
@@ -720,7 +722,7 @@
       function tick() {
         composerText.innerHTML = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
         i += 2;
-        if (i <= text.length + 2) wait(tick, 22);
+        if (i <= text.length + 2) wait(tick, delay(22));
         else {
           composerText.textContent = text;
           if (done) done();
@@ -746,8 +748,8 @@
         wait(() => {
           addBubble(step.request, 'customer');
           composerText.textContent = 'Request sent';
-        }, 160);
-        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), 760);
+        }, delay(160));
+        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(760));
         wait(() => {
           messages.appendChild(commandLog);
           step.logs.forEach((line, i) => {
@@ -756,14 +758,14 @@
               div.className = `log-line ${i === step.logs.length - 1 ? 'ok' : ''}`;
               div.textContent = `${i === step.logs.length - 1 ? '✓' : '>'} ${line}`;
               commandLog.appendChild(div);
-            }, i * 430);
+            }, delay(i * 430));
           });
-        }, 1250);
+        }, delay(1250));
         wait(() => {
           step.apply();
           addBubble('<strong>Done.</strong> The website has been updated. Refresh the phone view and it matches the request.', 'agent');
-        }, 3200);
-        if (playing) wait(nextStep, 6000);
+        }, delay(3200));
+        if (playing) wait(nextStep, delay(6000));
       });
     }
 
