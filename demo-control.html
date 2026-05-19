@@ -35,6 +35,9 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    * { box-sizing: border-box; }
+    html, body { max-width: 100%; overflow-x: hidden; }
+
     body {
       min-height: 100vh;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -319,7 +322,7 @@
       transition: transform 1.05s cubic-bezier(.18,.82,.18,1), opacity .28s ease, box-shadow .45s ease;
     }
 
-    .floating-request.show { opacity: 1; }
+    .floating-request.show { opacity: 0; }
     .floating-request.fading { opacity: 0; transform: scale(.98); }
 
     .floating-request-label {
@@ -358,6 +361,33 @@
 
     .floating-request.shrink .floating-request-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .floating-request .typing { border-right-color: #1669d8; }
+
+    .mobile-request-panel {
+      display: none;
+      margin-top: 10px;
+      border: 1px solid rgba(47,134,255,.35);
+      border-radius: 18px;
+      background: rgba(255,255,255,.96);
+      color: #071527;
+      box-shadow: 0 16px 40px rgba(0,0,0,.22);
+      padding: 13px 14px;
+    }
+    .mobile-request-label {
+      color: #1669d8;
+      font-size: 10px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .mobile-request-text {
+      font-size: 1rem;
+      line-height: 1.22;
+      font-weight: 900;
+      letter-spacing: -.035em;
+      color: #061223;
+      min-height: 44px;
+    }
 
     .browser-bar {
       padding: 13px 16px;
@@ -555,16 +585,41 @@
     }
 
     @media (max-width: 720px) {
-      .shell { width: min(100% - 18px, 1500px); padding-top: 14px; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      .site { padding: 12px; }
+      .shell { width: min(100% - 18px, 1500px); padding-top: 14px; overflow-x: hidden; }
+      .topbar { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .top-actions { display: none; }
+      .brand { font-size: 14px; }
+      .brand small { display: none; }
+      .headline { display: block; margin: 10px 0 10px; }
+      .headline > div:first-child { display: none; }
+      .headline h1 { font-size: clamp(2.1rem, 14vw, 3.2rem); }
+      .headline .subhead { display: none; }
+      .demo-stage, .website-frame, .assistant-panel { min-width: 0; width: 100%; max-width: 100%; }
+      .assistant-panel { display: none; }
+      .website-frame { min-height: auto; }
+      .browser-bar { padding: 9px 10px; }
+      .url { min-width: 0; font-size: 11px; }
+      .site { padding: 8px; max-height: 430px; overflow: hidden; width: 100%; max-width: 100%; }
+      .site-inner { min-height: 0; grid-template-rows: auto auto auto; width: 100%; max-width: 100%; overflow: hidden; }
+      .site-nav { padding: 12px 14px; }
+      .site-alert .alert-inner { white-space: normal; }
       .site-nav nav { display: none; }
-      .site-hero { padding: 24px 20px; }
-      .site-grid { grid-template-columns: 1fr; padding: 0 20px 20px; }
-      .floating-request { padding: 14px; border-radius: 22px; }
-      .floating-request-label { font-size: 10px; }
-      .floating-request-kbd { display: none; }
-      .floating-request-text { min-height: 58px; font-size: .98rem; line-height: 1.16; }
+      .site-hero { grid-template-columns: 1fr; padding: 18px 16px 14px; gap: 12px; }
+      .site h2 { font-size: 1.25rem; line-height: 1.08; margin-bottom: 8px; overflow-wrap: anywhere; }
+      .site-copy { font-size: 12px; line-height: 1.32; overflow-wrap: anywhere; }
+      .site-actions { margin-top: 12px; gap: 8px; }
+      .site-btn { padding: 9px 11px; font-size: 12px; }
+      .photo-card { display: none; }
+      .site-grid { grid-template-columns: 1fr; padding: 0 16px 14px; gap: 8px; }
+      .site-card { min-height: auto; padding: 12px; }
+      .site-card:not(.changed) { display: none; }
+      .site-card h3 { font-size: 14px; }
+      .site-card p { font-size: 12px; }
+      .site-footer { display: none; }
+      .mobile-request-panel { display: block; width: 100%; max-width: 100%; overflow: hidden; padding: 12px 12px; }
+      .mobile-request-text { overflow-wrap: anywhere; font-size: .9rem; line-height: 1.2; }
+      .progress-label, .progress-strip { display: none; }
+      .floating-request { display: none; }
       .controls { justify-content: flex-start; }
     }
   </style>
@@ -648,6 +703,10 @@
             <footer class="site-footer"><span id="seoText">SEO: BBQ catering in Cedar Hill, TX</span><span id="leadText">Lead form: Name, phone, event date</span></footer>
           </div>
           <div class="phone-preview" aria-hidden="true"><div class="mini-site"><div class="mini-top"></div><div class="mini-line" style="width:82%"></div><div class="mini-line" style="width:64%"></div><div class="mini-block"></div><div class="mini-line" style="width:72%"></div><div class="mini-line" style="width:52%"></div></div></div>
+        </div>
+        <div class="mobile-request-panel" aria-live="polite">
+          <div class="mobile-request-label">Text request</div>
+          <div class="mobile-request-text" id="mobileRequestText">Typing request…</div>
         </div>
       </section>
     </section>
@@ -786,6 +845,7 @@
     const composerText = $('composerText');
     const floatingRequest = $('floatingRequest');
     const floatingRequestText = $('floatingRequestText');
+    const mobileRequestText = $('mobileRequestText');
     document.body.appendChild(floatingRequest);
     const runBadge = $('runBadge');
     const progressStrip = $('progressStrip');
@@ -888,61 +948,42 @@
       return b;
     }
 
-    function placeFloatingRequestOverWebsite() {
-      const frame = document.querySelector('.website-frame').getBoundingClientRect();
-      const viewportPad = 18;
-      const viewportWidth = Math.min(window.visualViewport?.width || window.innerWidth, document.documentElement.clientWidth || window.innerWidth, window.innerWidth);
-      const viewportHeight = Math.min(window.visualViewport?.height || window.innerHeight, document.documentElement.clientHeight || window.innerHeight, window.innerHeight);
-      const isNarrow = viewportWidth <= 720;
-      const maxVisibleWidth = viewportWidth - viewportPad * 2;
-      const width = isNarrow ? maxVisibleWidth : Math.min(680, Math.max(300, frame.width - 62), maxVisibleWidth);
-      const rawLeft = isNarrow ? viewportPad : frame.left + (frame.width - width) / 2;
-      const rawTop = frame.top + Math.min(148, Math.max(86, frame.height * .17));
-      const left = Math.max(viewportPad, Math.min(rawLeft, viewportWidth - width - viewportPad));
-      const top = Math.max(96, Math.min(rawTop, viewportHeight - 230));
-      floatingRequest.style.left = `${left}px`;
-      floatingRequest.style.top = `${top}px`;
-      floatingRequest.style.width = `${width}px`;
-      floatingRequest.style.transform = 'scale(1)';
-    }
-
-    function resetFloatingRequest() {
+    function resetRequestText() {
       floatingRequest.classList.remove('show', 'fading', 'submitting', 'shrink');
-      floatingRequest.style.transition = '';
-      placeFloatingRequestOverWebsite();
-      floatingRequestText.textContent = 'Typing request…';
+      composerText.textContent = 'Typing request…';
+      if (mobileRequestText) mobileRequestText.textContent = 'Typing request…';
     }
 
-    function typeFloatingRequest(text, done) {
-      resetFloatingRequest();
-      composerText.textContent = 'Watch the customer request on the website →';
-      wait(() => {
-        floatingRequest.classList.add('show');
-        floatingRequestText.textContent = '';
-        let i = 0;
-        function tick() {
-          floatingRequestText.innerHTML = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
-          i += 2;
-          if (i <= text.length + 2) wait(tick, delay(28));
-          else {
-            floatingRequestText.textContent = text;
-            if (done) done();
-          }
-        }
-        tick();
-      }, delay(180));
-    }
-
-    function fadeFloatingRequest(done) {
-      floatingRequest.classList.add('fading');
-      composerText.textContent = 'Request received. Processing…';
-      wait(() => {
-        floatingRequest.classList.remove('show');
-        wait(() => {
-          resetFloatingRequest();
+    function typeRequestText(text, done) {
+      resetRequestText();
+      composerText.textContent = '';
+      if (mobileRequestText) mobileRequestText.textContent = '';
+      let i = 0;
+      function tick() {
+        const typed = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
+        composerText.innerHTML = typed;
+        if (mobileRequestText) mobileRequestText.innerHTML = typed;
+        i += 2;
+        if (i <= text.length + 2) wait(tick, delay(28));
+        else {
+          composerText.textContent = text;
+          if (mobileRequestText) mobileRequestText.textContent = text;
           if (done) done();
-        }, delay(120));
-      }, delay(620));
+        }
+      }
+      tick();
+    }
+
+    function fadeMobileRequest(done) {
+      if (mobileRequestText) mobileRequestText.style.opacity = '0';
+      composerText.textContent = 'Request sent';
+      wait(() => {
+        if (mobileRequestText) {
+          mobileRequestText.textContent = 'Processing…';
+          mobileRequestText.style.opacity = '1';
+        }
+        if (done) done();
+      }, delay(420));
     }
 
     function renderProgress() {
@@ -957,16 +998,15 @@
       renderProgress();
       messages.innerHTML = '';
       commandLog.innerHTML = '';
-      resetFloatingRequest();
-      composerText.textContent = 'Watch the customer request on the website →';
+      resetRequestText();
 
-      typeFloatingRequest(step.request, () => {
+      typeRequestText(step.request, () => {
         wait(() => {
-          fadeFloatingRequest(() => {
+          fadeMobileRequest(() => {
             addBubble(step.request, 'customer');
             composerText.textContent = 'Request sent';
           });
-        }, delay(2200));
+        }, delay(1600));
         wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), delay(2200));
         wait(() => {
           messages.appendChild(commandLog);
@@ -1001,8 +1041,6 @@
     nextBtn.addEventListener('click', () => { nextStep(); });
     restartBtn.addEventListener('click', () => { index = 0; playing = true; playPause.textContent = 'Pause demo'; renderStep(); });
     sendBtn.addEventListener('click', () => { nextStep(); });
-    window.addEventListener('resize', () => { if (!floatingRequest.classList.contains('submitting')) placeFloatingRequestOverWebsite(); });
-
     renderStep();
   </script>
 </body>
