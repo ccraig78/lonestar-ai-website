@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Live Website Change Demo | LoneStar AI</title>
+    <meta name="description" content="A live LoneStar AI demo page used to prove that a real website can be changed from a plain-English request." />
+    <meta name="theme-color" content="#071426" />
+    <link rel="stylesheet" href="styles.css?v=20260519-website-control" />
+    <style>
+      .live-hero { min-height: auto; }
+      .live-hero .hero-grid { align-items: start; }
+      .live-proof-card {
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(22,105,216,.30), rgba(8,25,47,.72));
+        box-shadow: 0 34px 90px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.14);
+        padding: 24px;
+        backdrop-filter: blur(14px);
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: rgba(71,233,139,.12);
+        border: 1px solid rgba(71,233,139,.28);
+        color: #b9ffd6;
+        font-weight: 900;
+        font-size: .86rem;
+      }
+      .status-pill::before {
+        content: '';
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: #47e98b;
+        box-shadow: 0 0 16px rgba(71,233,139,.88);
+      }
+      .live-board {
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, .72fr);
+        gap: 22px;
+        align-items: stretch;
+      }
+      .live-site,
+      .live-request,
+      .live-note-card {
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.035));
+        box-shadow: 0 24px 70px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.10);
+        overflow: hidden;
+      }
+      .live-site-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 16px 18px;
+        background: rgba(3,8,17,.52);
+        border-bottom: 1px solid rgba(255,255,255,.11);
+      }
+      .live-site-top strong { display: block; color: white; }
+      .live-site-top span { display: block; color: rgba(255,255,255,.60); font-size: .9rem; }
+      .live-change-tag {
+        align-self: start;
+        border-radius: 999px;
+        padding: 7px 10px;
+        color: #bcd6ff;
+        background: rgba(47,134,255,.16);
+        border: 1px solid rgba(125,171,255,.28);
+        font-weight: 900;
+        font-size: .78rem;
+        white-space: nowrap;
+      }
+      .live-site-body { padding: clamp(20px, 4vw, 34px); }
+      .customer-site-preview {
+        color: #142033;
+        background: #f7efe2;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(0,0,0,.28);
+      }
+      .customer-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding: 18px;
+        background: #17324f;
+        color: white;
+      }
+      .customer-header nav { display: flex; gap: 14px; flex-wrap: wrap; font-size: .88rem; color: rgba(255,255,255,.76); font-weight: 800; }
+      .customer-main { padding: clamp(22px, 4vw, 38px); }
+      .customer-kicker { color: #e3343f; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; font-size: .74rem; }
+      .customer-main h2 { color: #142033; margin: 8px 0 12px; font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1; letter-spacing: -.055em; }
+      .customer-main p { color: rgba(20,32,51,.72); line-height: 1.58; max-width: 680px; }
+      .customer-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+      .customer-actions span { display: inline-flex; align-items: center; min-height: 42px; padding: 0 14px; border-radius: 10px; background: #1669d8; color: white; font-weight: 950; }
+      .customer-actions span.secondary { background: rgba(20,32,51,.09); color: #17324f; }
+      .customer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; }
+      .customer-grid article { border-radius: 16px; padding: 16px; background: rgba(255,255,255,.72); border: 1px solid rgba(20,32,51,.10); }
+      .customer-grid h3 { color: #142033; margin: 0 0 7px; font-size: 1rem; }
+      .customer-grid p { margin: 0; font-size: .95rem; }
+      .live-request { padding: 22px; }
+      .live-request label { display: grid; gap: 8px; margin-bottom: 14px; color: white; font-weight: 900; }
+      .live-request input,
+      .live-request textarea {
+        width: 100%;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 14px;
+        background: rgba(4,10,20,.52);
+        color: white;
+        padding: 13px 14px;
+        font: inherit;
+        resize: vertical;
+      }
+      .live-request input::placeholder,
+      .live-request textarea::placeholder { color: rgba(255,255,255,.42); }
+      .live-request textarea { min-height: 132px; }
+      .live-request-actions { display: grid; gap: 10px; margin-top: 14px; }
+      .copy-status { min-height: 20px; color: #b9ffd6; font-size: .9rem; }
+      .live-steps { counter-reset: live-step; display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+      .live-steps li {
+        counter-increment: live-step;
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 16px;
+        border-radius: 18px;
+        background: rgba(255,255,255,.07);
+        border: 1px solid rgba(255,255,255,.11);
+      }
+      .live-steps li::before {
+        content: counter(live-step);
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 950;
+        background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      }
+      .live-steps strong { display: block; color: white; margin-bottom: 4px; }
+      .live-steps span { color: rgba(255,255,255,.70); line-height: 1.5; }
+      .live-note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 24px; }
+      .live-note-card { padding: 22px; }
+      .live-note-card h3 { margin-top: 0; }
+      .live-note-card p { color: rgba(255,255,255,.72); line-height: 1.58; }
+      @media (max-width: 980px) {
+        .live-board, .live-note-grid { grid-template-columns: 1fr; }
+        .site-header { padding: 10px 16px; gap: 12px; max-width: 100vw; overflow: visible; }
+        .menu-toggle { display: flex; margin-left: auto; flex: 0 0 46px; }
+        .site-header nav {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 14px;
+          right: 14px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 6px;
+          width: auto;
+          padding: 10px;
+          font-size: .95rem;
+          background: rgba(4,10,20,.96);
+          border: 1px solid rgba(255,255,255,.13);
+          border-radius: 18px;
+          box-shadow: 0 22px 55px rgba(0,0,0,.34);
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-8px) scale(.98);
+          transform-origin: top right;
+          transition: opacity .18s ease, transform .18s ease;
+        }
+        .site-header.menu-open nav { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); }
+        .site-header nav a { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 12px; opacity: 1; }
+        .site-header nav .nav-cta { justify-content: center; margin-top: 4px; }
+        .live-hero .hero-grid,
+        .live-hero .hero-copy,
+        .live-proof-card,
+        .live-board,
+        .live-site,
+        .live-request,
+        .live-note-card,
+        .customer-site-preview {
+          width: 100%;
+          max-width: calc(100vw - 36px);
+          min-width: 0;
+        }
+        .live-proof-card *, .live-request *, .live-site *, .live-note-card * { min-width: 0; overflow-wrap: anywhere; }
+      }
+      @media (max-width: 620px) {
+        .live-hero .hero-grid,
+        .live-hero .hero-copy,
+        .live-proof-card,
+        .live-board,
+        .live-site,
+        .live-request,
+        .live-note-card,
+        .customer-site-preview {
+          width: 100%;
+          max-width: calc(100vw - 36px);
+          min-width: 0;
+        }
+        .live-proof-card, .live-request, .live-note-card { padding: 18px; border-radius: 20px; }
+        .live-proof-card *, .live-request *, .live-site *, .live-note-card * { min-width: 0; overflow-wrap: anywhere; }
+        .live-site-top { display: grid; }
+        .live-site-body { padding: 16px; }
+        .customer-header { display: grid; }
+        .customer-header nav { gap: 9px; }
+        .customer-grid { grid-template-columns: 1fr; }
+        .customer-main { padding: 20px; }
+        .customer-main h2 { font-size: clamp(2rem, 12vw, 2.75rem); }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html#top" aria-label="LoneStar AI home">
+        <img src="assets/images/ls-star-rounded-gradient.svg" alt="LoneStar AI logo" />
+        <span><span class="brand-lone">Lone</span><span class="brand-star">Star</span> AI</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-controls="primary-nav" aria-expanded="false" data-menu-toggle>
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav id="primary-nav" aria-label="Primary navigation" data-primary-nav>
+        <a href="index.html#top">Home</a>
+        <a href="demo-control.html">Mock Demo</a>
+        <a href="live-demo.html">Live Demo</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a class="nav-cta" href="index.html#contact">Book a Free Demo</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero section-pad live-hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow blue">Live proof page</p>
+            <div class="hero-logo-chip"><img src="assets/images/ls-star-rounded-gradient.svg" alt="" aria-hidden="true" /><span>Real site. Real request. Real change.</span></div>
+            <h1>Change This <span>Live Page</span>.</h1>
+            <p class="hero-lede">This page is the real proof demo. During an in-person demo, the customer can ask for a change to this page in plain English. Codi makes the actual website change, Clint refreshes the page, and the customer sees that it really went live.</p>
+            <div class="hero-actions">
+              <a class="btn primary" href="#make-request">Request a Live Change</a>
+              <a class="btn ghost" href="demo-control.html">Watch the Mock Demo First</a>
+            </div>
+            <div class="trust-strip" aria-label="Live demo priorities">
+              <span>Proof over speed</span>
+              <span>Owner-approved changes</span>
+              <span>No fake animation required</span>
+            </div>
+          </div>
+
+          <aside class="live-proof-card" aria-label="How the live demo works">
+            <span class="status-pill">Live demo target ready</span>
+            <h2 style="margin:18px 0 10px;line-height:1.05;letter-spacing:-.045em;">This is not the fast mockup.</h2>
+            <p style="color:rgba(255,255,255,.72);line-height:1.6;margin:0;">The mock demo shows the idea quickly. This page proves the real workflow: a person asks for a change, LoneStar edits the actual website, publishes it, and the page updates for real.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-pad">
+        <div class="section-heading centered">
+          <p class="eyebrow">The page we can change live</p>
+          <h2>Live Change Target</h2>
+          <p>This section is intentionally simple so the change is obvious when the customer refreshes. Ask for wording, colors, sections, buttons, service details, specials, FAQs, or layout tweaks.</p>
+        </div>
+
+        <div class="live-board" style="margin-top:34px;">
+          <article class="live-site" aria-label="Live customer-style page preview">
+            <div class="live-site-top">
+              <div><strong>Live sample website</strong><span>Last prepared for: LoneStar live proof demo</span></div>
+              <div class="live-change-tag">Editable live page</div>
+            </div>
+            <div class="live-site-body">
+              <div class="customer-site-preview">
+                <header class="customer-header">
+                  <strong data-live-target="business-name">Oak Street Auto Detail</strong>
+                  <nav aria-label="Sample website navigation"><span>Services</span><span>Packages</span><span>Reviews</span><span>Contact</span></nav>
+                </header>
+                <section class="customer-main">
+                  <div class="customer-kicker" data-live-target="kicker">Mobile detailing in Dallas</div>
+                  <h2 data-live-target="headline">A cleaner car without losing your Saturday.</h2>
+                  <p data-live-target="body-copy">We come to your home or office for practical interior and exterior detailing. Choose a simple wash, a full interior reset, or a package for getting a vehicle ready to sell.</p>
+                  <div class="customer-actions">
+                    <span data-live-target="primary-button">Request a Detail Quote</span>
+                    <span class="secondary" data-live-target="secondary-button">See Packages</span>
+                  </div>
+                  <div class="customer-grid">
+                    <article>
+                      <h3 data-live-target="card-one-title">Fast booking</h3>
+                      <p data-live-target="card-one-copy">Send your vehicle type, location, and preferred time.</p>
+                    </article>
+                    <article>
+                      <h3 data-live-target="card-two-title">Clear packages</h3>
+                      <p data-live-target="card-two-copy">Interior, exterior, and full detail options without confusing upsells.</p>
+                    </article>
+                    <article>
+                      <h3 data-live-target="card-three-title">Local service</h3>
+                      <p data-live-target="card-three-copy">Serving Dallas-area drivers who want simple scheduling and honest work.</p>
+                    </article>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+
+          <aside id="make-request" class="live-request" aria-label="Request a live website change">
+            <p class="eyebrow blue">Type a request</p>
+            <h2 style="margin:0 0 10px;line-height:1.06;letter-spacing:-.04em;">What should we change?</h2>
+            <p style="color:rgba(255,255,255,.72);line-height:1.55;margin-top:0;">This does not auto-publish by itself yet. It prepares a clear request Clint can send to Codi during the demo, then Codi edits this real page and pushes the update live.</p>
+            <form data-live-request-form>
+              <label>Your name or business <input name="who" placeholder="Example: Maria at Oak Street Auto" /></label>
+              <label>Change request <textarea name="request" required placeholder="Example: Change the business to a BBQ catering company and make the headline about wedding catering."></textarea></label>
+              <div class="live-request-actions">
+                <button class="btn primary" type="submit">Copy live change request</button>
+                <a class="btn ghost" data-live-sms href="sms:+12144708099">Text Clint</a>
+                <a class="btn ghost" data-live-email href="mailto:hello@lonestaraiassistants.com">Email LoneStar</a>
+              </div>
+              <div class="copy-status" data-copy-status aria-live="polite"></div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section-pad light">
+        <div class="section-heading centered">
+          <p class="eyebrow">What the customer sees</p>
+          <h2>The point is proof, not instant speed.</h2>
+          <p>A real website change may take a few minutes. That is okay. The important moment is when the customer sees their own request become a real published page change.</p>
+        </div>
+        <ol class="live-steps" style="margin-top:32px;">
+          <li><div><strong>Customer asks in plain English</strong><span>They request a wording, color, service, button, FAQ, layout, or offer change.</span></div></li>
+          <li><div><strong>Codi edits the live page</strong><span>The request is handled like a real website update, not just an animation inside the browser.</span></div></li>
+          <li><div><strong>Clint refreshes the page</strong><span>The customer sees the real website update after the change is published.</span></div></li>
+          <li><div><strong>Then we explain the service</strong><span>This is what monthly website control care is for: keeping the site useful as the business changes.</span></div></li>
+        </ol>
+
+        <div class="live-note-grid">
+          <article class="live-note-card"><h3>Honest demo</h3><p>The mock demo is faster and more polished. This page is slower because it proves a real update path.</p></article>
+          <article class="live-note-card"><h3>Safe changes</h3><p>The owner approves the request. LoneStar can make the change, review it, and publish it without handing the customer a confusing website builder.</p></article>
+          <article class="live-note-card"><h3>Strong sales moment</h3><p>When the customer sees their own words turn into a live website change, the idea becomes concrete instead of abstract.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <a class="brand" href="index.html#top" aria-label="LoneStar AI home">
+          <img src="assets/images/ls-star-rounded-gradient.svg" alt="LoneStar AI logo" />
+          <span><span class="brand-lone">Lone</span><span class="brand-star">Star</span> AI</span>
+        </a>
+        <p>Website control, improvement, SEO help, FAQs, and lead capture for small businesses — powered by practical AI.</p>
+      </div>
+      <div>
+        <h3>Quick Links</h3>
+        <a href="index.html#top">Home</a>
+        <a href="demo-control.html">Mock Demo</a>
+        <a href="live-demo.html">Live Demo</a>
+        <a href="index.html#pricing">Pricing</a>
+      </div>
+      <div>
+        <h3>Live Demo Ideas</h3>
+        <span>Change the business type</span>
+        <span>Rewrite the headline</span>
+        <span>Add a seasonal special</span>
+        <span>Update the CTA</span>
+      </div>
+      <div>
+        <h3>Let’s Talk</h3>
+        <a href="index.html#contact">Book a Free Demo</a>
+        <a href="mailto:hello@lonestaraiassistants.com">hello@lonestaraiassistants.com</a>
+        <a href="tel:+12144708099">214-470-8099</a>
+        <span>Serving Dallas / Fort Worth small businesses</span>
+      </div>
+    </footer>
+
+    <script src="assets/js/guided-selector.js?v=20260519-website-control" defer></script>
+    <script>
+      const liveForm = document.querySelector('[data-live-request-form]');
+      const copyStatus = document.querySelector('[data-copy-status]');
+      const smsLink = document.querySelector('[data-live-sms]');
+      const emailLink = document.querySelector('[data-live-email]');
+
+      function buildLiveRequest() {
+        const data = new FormData(liveForm);
+        const who = String(data.get('who') || '').trim() || 'Live demo customer';
+        const request = String(data.get('request') || '').trim();
+        return [
+          'LoneStar LIVE website change request',
+          '',
+          `From: ${who}`,
+          'Page: live-demo.html',
+          '',
+          'Requested change:',
+          request,
+          '',
+          'Goal: Make the change on the real live demo page, publish it, then have Clint refresh the customer browser.'
+        ].join('\n');
+      }
+
+      function refreshShareLinks() {
+        if (!liveForm) return;
+        const text = buildLiveRequest();
+        const encoded = encodeURIComponent(text);
+        smsLink.href = `sms:+12144708099?body=${encoded}`;
+        emailLink.href = `mailto:hello@lonestaraiassistants.com?subject=${encodeURIComponent('LoneStar live website change request')}&body=${encoded}`;
+      }
+
+      liveForm?.addEventListener('input', refreshShareLinks);
+      liveForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const text = buildLiveRequest();
+        try {
+          await navigator.clipboard.writeText(text);
+          copyStatus.textContent = 'Copied. Send this to Clint/Codi during the live demo.';
+        } catch (_) {
+          copyStatus.textContent = 'Copy failed. Use the Text Clint or Email LoneStar button instead.';
+        }
+        refreshShareLinks();
+      });
+      refreshShareLinks();
+    </script>
+  </body>
+</html>
