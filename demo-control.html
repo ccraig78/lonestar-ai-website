@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LoneStar AI Website Control Demo</title>
+  <meta name="description" content="A LoneStar AI demo showing how a small business website can change from plain-English requests." />
+  <style>
+    :root {
+      --navy: #071426;
+      --navy-2: #0b1e36;
+      --blue: #1669d8;
+      --blue-2: #2f86ff;
+      --red: #e3343f;
+      --red-2: #ff5b61;
+      --ink: #f7fbff;
+      --muted: #b8c7dd;
+      --glass: rgba(255,255,255,.09);
+      --line: rgba(255,255,255,.16);
+      --site-bg: #0b2e67;
+      --site-card: rgba(255,255,255,.94);
+      --site-text: #112033;
+      --site-accent: #2f86ff;
+      --site-banner: #e3343f;
+      --site-banner-text: #fff;
+      --site-radius: 24px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 14%, rgba(47,134,255,.42), transparent 30%),
+        radial-gradient(circle at 82% 18%, rgba(227,52,63,.28), transparent 28%),
+        linear-gradient(135deg, #04101f 0%, var(--navy) 44%, #0b1f3e 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .34;
+      background-image:
+        linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    .shell {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 34px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      letter-spacing: -.03em;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--red));
+      box-shadow: 0 18px 44px rgba(22,105,216,.28);
+      font-size: 22px;
+    }
+
+    .brand small { display: block; color: var(--muted); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; margin-top: 2px; }
+
+    .pill {
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #dbe8ff;
+      font-size: 13px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .headline {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 4.8rem);
+      line-height: .96;
+      letter-spacing: -.08em;
+      max-width: 900px;
+    }
+
+    h1 span { color: #79b2ff; text-shadow: 0 0 34px rgba(47,134,255,.34); }
+
+    .subhead {
+      color: var(--muted);
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+      max-width: 740px;
+      margin-top: 14px;
+      line-height: 1.55;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 15px;
+      font-weight: 900;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      box-shadow: 0 14px 30px rgba(22,105,216,.32);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+
+    button:hover, button:focus-visible {
+      background: linear-gradient(135deg, var(--red), var(--red-2));
+      transform: translateY(-1px);
+      box-shadow: 0 16px 34px rgba(227,52,63,.3);
+    }
+
+    button.secondary { background: rgba(255,255,255,.11); border: 1px solid rgba(255,255,255,.18); color: #dbe8ff; box-shadow: none; }
+    button.secondary:hover { background: linear-gradient(135deg, var(--red), var(--red-2)); color: white; }
+
+    .demo-stage {
+      display: grid;
+      grid-template-columns: minmax(400px, .88fr) minmax(600px, 1.35fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .assistant-panel, .website-frame {
+      min-height: 720px;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background: rgba(3,12,24,.72);
+      box-shadow: 0 30px 90px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .assistant-panel {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .panel-head {
+      padding: 18px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+    }
+
+    .agent-id { display: flex; align-items: center; gap: 10px; }
+    .agent-dot { width: 12px; height: 12px; border-radius: 50%; background: #47e98b; box-shadow: 0 0 18px rgba(71,233,139,.76); }
+    .agent-id strong { display: block; }
+    .agent-id small { color: var(--muted); }
+
+    .run-badge {
+      font-size: 12px;
+      color: #dceaff;
+      border: 1px solid rgba(255,255,255,.16);
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .messages {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bubble {
+      max-width: 92%;
+      border-radius: 20px;
+      padding: 14px 15px;
+      line-height: 1.45;
+      font-size: 15px;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: bubbleIn .36s ease forwards;
+    }
+
+    .bubble.customer {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2));
+      color: white;
+      border-bottom-right-radius: 6px;
+      box-shadow: 0 16px 36px rgba(22,105,216,.25);
+    }
+
+    .bubble.agent {
+      align-self: flex-start;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.12);
+      color: #e9f2ff;
+      border-bottom-left-radius: 6px;
+    }
+
+    .bubble strong { color: #fff; }
+    .typing { display: inline-block; min-width: 8px; border-right: 2px solid rgba(255,255,255,.78); animation: blink .75s step-end infinite; }
+
+    .command-log {
+      margin-top: auto;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #bce2ff;
+      font-size: 13px;
+      line-height: 1.58;
+      min-height: 156px;
+      overflow: hidden;
+    }
+
+    .log-line { opacity: 0; transform: translateX(-6px); animation: logIn .25s ease forwards; }
+    .log-line.ok { color: #73efad; }
+    .log-line.warn { color: #ffd27a; }
+
+    .composer {
+      padding: 15px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: rgba(0,0,0,.18);
+    }
+
+    .input-look {
+      flex: 1;
+      min-height: 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      padding: 12px 15px;
+      color: #dbe8ff;
+      font-size: 14px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .website-frame {
+      background: #06101d;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .browser-bar {
+      padding: 13px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .traffic { display: flex; gap: 7px; }
+    .traffic span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+    .traffic span:nth-child(1) { background: #ff5f57; }
+    .traffic span:nth-child(2) { background: #febc2e; }
+    .traffic span:nth-child(3) { background: #28c840; }
+    .url { flex: 1; color: #cfe0f7; background: rgba(0,0,0,.22); border-radius: 999px; padding: 8px 13px; font-size: 13px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+    .site {
+      flex: 1;
+      color: var(--site-text);
+      background:
+        radial-gradient(circle at 78% 20%, color-mix(in srgb, var(--site-accent) 28%, transparent), transparent 28%),
+        linear-gradient(135deg, color-mix(in srgb, var(--site-bg) 88%, white), var(--site-bg));
+      transition: background .72s ease, color .72s ease;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .site-inner {
+      min-height: 100%;
+      border-radius: var(--site-radius);
+      overflow: hidden;
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 26px 70px rgba(0,0,0,.22);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      transition: border-radius .5s ease, background .5s ease;
+    }
+
+    .site-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      padding: 17px 22px;
+      background: var(--site-card);
+      color: var(--site-text);
+    }
+
+    .biz-logo { display: flex; align-items: center; gap: 10px; font-weight: 950; letter-spacing: -.04em; }
+    .biz-logo span { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; color: white; background: var(--site-accent); transition: background .5s ease; }
+    .site-nav nav { display: flex; gap: 15px; color: rgba(17,32,51,.72); font-size: 14px; font-weight: 700; }
+
+    .site-alert {
+      background: var(--site-banner);
+      color: var(--site-banner-text);
+      padding: 11px 22px;
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      font-weight: 900;
+      transition: background .5s ease, color .5s ease;
+    }
+
+    .site-hero {
+      padding: 34px 34px 26px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(230px, .85fr);
+      gap: 26px;
+      align-items: center;
+    }
+
+    .site-kicker { color: var(--site-accent); font-weight: 950; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; margin-bottom: 10px; transition: color .5s ease; }
+    .site h2 { font-size: clamp(2rem, 3vw, 3.4rem); line-height: .98; letter-spacing: -.07em; margin-bottom: 14px; color: var(--site-text); transition: color .5s ease; }
+    .site-copy { color: rgba(17,32,51,.75); line-height: 1.55; max-width: 560px; font-size: 16px; }
+    .site-actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 20px; }
+    .site-btn { background: var(--site-accent); color: white; border-radius: 999px; padding: 11px 14px; font-weight: 900; transition: background .5s ease; }
+    .site-btn.ghost { background: rgba(17,32,51,.08); color: var(--site-text); }
+
+    .photo-card {
+      min-height: 260px;
+      border-radius: 24px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.72), rgba(255,255,255,.18)),
+        var(--photo-gradient, linear-gradient(135deg, #2f86ff, #e3343f));
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 22px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.14);
+      color: #fff;
+      text-shadow: 0 2px 18px rgba(0,0,0,.34);
+      transition: background .7s ease, transform .5s ease;
+    }
+    .photo-card strong { display: block; font-size: 28px; letter-spacing: -.04em; }
+    .photo-card small { display: block; margin-top: 8px; font-weight: 800; opacity: .95; }
+
+    .site-grid {
+      padding: 0 34px 28px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .site-card {
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(17,32,51,.08);
+      border-radius: 18px;
+      padding: 17px;
+      min-height: 124px;
+      transition: transform .4s ease, border-color .4s ease, background .4s ease;
+    }
+    .site-card.changed { animation: pulse .8s ease; border-color: color-mix(in srgb, var(--site-accent) 58%, white); }
+    .site-card h3 { font-size: 16px; margin-bottom: 7px; color: var(--site-text); }
+    .site-card p { color: rgba(17,32,51,.7); font-size: 13px; line-height: 1.45; }
+
+    .site-footer {
+      background: rgba(17,32,51,.05);
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: rgba(17,32,51,.7);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .phone-preview {
+      position: absolute;
+      right: 26px;
+      bottom: 26px;
+      width: 156px;
+      height: 286px;
+      border: 7px solid #111827;
+      border-radius: 30px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 24px 60px rgba(0,0,0,.34);
+      transform: rotate(2deg);
+      transition: transform .45s ease;
+    }
+    .phone-preview .mini-site { height: 100%; background: var(--site-bg); padding: 9px; transition: background .72s ease; }
+    .phone-preview .mini-top { height: 42px; border-radius: 14px; background: var(--site-banner); margin-bottom: 8px; transition: background .5s ease; }
+    .phone-preview .mini-line { height: 12px; border-radius: 999px; background: rgba(255,255,255,.82); margin: 8px 0; }
+    .phone-preview .mini-block { height: 72px; border-radius: 18px; background: var(--photo-gradient, linear-gradient(135deg, #2f86ff, #e3343f)); margin-top: 14px; transition: background .7s ease; }
+
+    .change-flash { animation: siteFlash .75s ease; }
+
+    .progress-label {
+      margin-top: 14px;
+      color: #c9d9f0;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .progress-strip {
+      display: grid;
+      grid-template-columns: repeat(20, 1fr);
+      gap: 4px;
+      margin-top: 7px;
+    }
+    .tick { height: 5px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; }
+    .tick.active { background: linear-gradient(90deg, var(--blue), var(--red)); box-shadow: 0 0 16px rgba(47,134,255,.45); }
+
+    @keyframes blink { 50% { border-color: transparent; } }
+    @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes logIn { to { opacity: 1; transform: translateX(0); } }
+    @keyframes siteFlash { 0%,100% { filter: brightness(1); } 35% { filter: brightness(1.18) saturate(1.14); } }
+    @keyframes pulse { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+
+    @media (max-width: 1100px) {
+      .headline, .demo-stage { grid-template-columns: 1fr; }
+      .assistant-panel, .website-frame { min-height: auto; }
+      .website-frame { min-height: 680px; }
+      .site-hero { grid-template-columns: 1fr; }
+      .phone-preview { display: none; }
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 18px, 1500px); padding-top: 14px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .site { padding: 12px; }
+      .site-nav nav { display: none; }
+      .site-hero { padding: 24px 20px; }
+      .site-grid { grid-template-columns: 1fr; padding: 0 20px 20px; }
+      .controls { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">★</div>
+        <div>
+          LoneStar AI Website Control Demo
+          <small>Change your website as easily as sending a text</small>
+        </div>
+      </div>
+      <div class="pill">Auto-runs 20 demo changes in about 2 minutes</div>
+    </header>
+
+    <section class="headline">
+      <div>
+        <h1>The customer asks. <span>The website changes.</span></h1>
+        <p class="subhead">This mock demo shows the idea in two minutes: a business owner types ordinary website requests, the LoneStar AI Assistant shows visible work, and the demo site changes in front of them.</p>
+      </div>
+      <div class="controls">
+        <button id="playPause" type="button">Pause demo</button>
+        <button class="secondary" id="nextBtn" type="button">Next change</button>
+        <button class="secondary" id="restartBtn" type="button">Restart</button>
+      </div>
+    </section>
+
+    <section class="demo-stage" aria-label="LoneStar AI website control mock demo">
+      <aside class="assistant-panel">
+        <div class="panel-head">
+          <div class="agent-id">
+            <span class="agent-dot"></span>
+            <div><strong>LoneStar AI Assistant</strong><small>Website control mode</small></div>
+          </div>
+          <div class="run-badge" id="runBadge">Run 1 / 20</div>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+        <div class="composer">
+          <div class="input-look" id="composerText">Typing request…</div>
+          <button type="button" id="sendBtn">Send</button>
+        </div>
+      </aside>
+
+      <section class="website-frame">
+        <div class="browser-bar">
+          <div class="traffic"><span></span><span></span><span></span></div>
+          <div class="url">https://demo.lonestaraiassistants.com/local-shop</div>
+        </div>
+        <div class="site" id="site">
+          <div class="site-inner" id="siteInner">
+            <header class="site-nav">
+              <div class="biz-logo"><span id="bizIcon">BBQ</span><div><strong id="businessName">Cedar Hill BBQ Co.</strong><small id="tagLine" style="display:block;color:rgba(17,32,51,.55);font-size:11px;letter-spacing:.08em;text-transform:uppercase;">Local family barbecue</small></div></div>
+              <nav><span>Menu</span><span>Events</span><span>Reviews</span><span>Contact</span></nav>
+            </header>
+            <div class="site-alert" id="bannerText">Family platters available all weekend — call ahead.</div>
+            <section class="site-hero">
+              <div>
+                <div class="site-kicker" id="kicker">Fresh smoke. Local flavor.</div>
+                <h2 id="heroTitle">Real Texas barbecue for busy families.</h2>
+                <p class="site-copy" id="heroCopy">Slow-smoked brisket, ribs, and sides made fresh daily. Order pickup, book catering, or stop by for lunch.</p>
+                <div class="site-actions">
+                  <div class="site-btn" id="primaryCta">Order Pickup</div>
+                  <div class="site-btn ghost" id="secondaryCta">Ask a Question</div>
+                </div>
+              </div>
+              <div class="photo-card" id="photoCard"><div><strong id="photoTitle">Smoked Daily</strong><small id="photoSub">Brisket • Ribs • Sausage</small></div></div>
+            </section>
+            <section class="site-grid">
+              <article class="site-card" id="hoursCard"><h3>Hours</h3><p id="hoursText">Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM</p></article>
+              <article class="site-card" id="serviceCard"><h3>Featured Service</h3><p id="serviceText">Family pickup packs and neighborhood catering.</p></article>
+              <article class="site-card" id="faqCard"><h3>FAQ</h3><p id="faqText">Do you cater? Yes — call or request a quote online.</p></article>
+            </section>
+            <footer class="site-footer"><span id="seoText">SEO: BBQ catering in Cedar Hill, TX</span><span id="leadText">Lead form: Name, phone, event date</span></footer>
+          </div>
+          <div class="phone-preview" aria-hidden="true"><div class="mini-site"><div class="mini-top"></div><div class="mini-line" style="width:82%"></div><div class="mini-line" style="width:64%"></div><div class="mini-block"></div><div class="mini-line" style="width:72%"></div><div class="mini-line" style="width:52%"></div></div></div>
+        </div>
+      </section>
+    </section>
+    <div class="progress-label"><span>20-run demo sequence</span><span>10 change types • 2 results each</span></div>
+    <div class="progress-strip" id="progressStrip" aria-label="Demo progress"></div>
+  </main>
+
+  <script>
+    const steps = [
+      {
+        type: 'Background color', request: 'Change the website background to blue and make it feel more modern.',
+        logs: ['Reading current theme tokens', 'Updating background palette to LoneStar blue', 'Checking contrast and mobile readability', 'Publishing blue theme'],
+        apply() { setTheme({bg:'#0b2e67', accent:'#2f86ff', banner:'#e3343f', photo:'linear-gradient(135deg,#2f86ff,#e3343f)', radius:'24px'}); changed('siteInner'); }
+      },
+      {
+        type: 'Business hours', request: 'Change our hours to 9 AM to 6 PM Monday through Saturday.',
+        logs: ['Finding hours section', 'Replacing weekday schedule', 'Checking footer/contact snippets', 'Hours updated'],
+        apply() { hoursText.innerHTML = 'Mon–Sat 9 AM–6 PM<br>Sunday 11 AM–4 PM'; changed('hoursCard'); }
+      },
+      {
+        type: 'Seasonal banner', request: 'Add a Christmas catering banner at the top of the site.',
+        logs: ['Creating seasonal banner copy', 'Applying red holiday accent', 'Checking banner on phone preview', 'Christmas banner live'],
+        apply() { bannerText.textContent = 'Christmas catering is open — reserve brisket trays before December 18.'; setVar('--site-banner', '#b81f2d'); setVar('--site-banner-text', '#fff7f7'); changed('bannerText'); }
+      },
+      {
+        type: 'Hero headline', request: 'Make the homepage headline focus on catering for local events.',
+        logs: ['Reviewing homepage hero', 'Drafting clearer catering headline', 'Updating call-to-action', 'Hero copy published'],
+        apply() { kicker.textContent = 'Catering made easy'; heroTitle.textContent = 'Feed the whole crew without the stress.'; heroCopy.textContent = 'From shop lunches to family parties, Cedar Hill BBQ Co. brings slow-smoked favorites to your event with easy pickup or catering quotes.'; primaryCta.textContent = 'Request Catering Quote'; changed('siteInner'); }
+      },
+      {
+        type: 'CTA / phone action', request: 'Make the main button say Text Us for Today’s Specials.',
+        logs: ['Finding primary CTA', 'Updating button label', 'Keeping button mobile-friendly', 'CTA updated'],
+        apply() { primaryCta.textContent = 'Text Us for Today’s Specials'; secondaryCta.textContent = 'View Menu'; changed('primaryCta'); }
+      },
+      {
+        type: 'New service', request: 'Add office lunch delivery as a service.',
+        logs: ['Adding service card language', 'Checking service hierarchy', 'Adding local-office keywords', 'Service updated'],
+        apply() { serviceText.textContent = 'Office lunch delivery, family pickup packs, and neighborhood catering.'; changed('serviceCard'); }
+      },
+      {
+        type: 'FAQ update', request: 'Add an FAQ that says we need 48 hours notice for catering orders.',
+        logs: ['Opening FAQ content', 'Adding catering notice question', 'Checking plain-English answer', 'FAQ updated'],
+        apply() { faqText.textContent = 'How much notice for catering? Please request catering at least 48 hours ahead.'; changed('faqCard'); }
+      },
+      {
+        type: 'SEO settings', request: 'Help the page target BBQ catering near Cedar Hill and Duncanville.',
+        logs: ['Drafting page title and meta description', 'Adding local service keywords naturally', 'Avoiding spammy SEO stuffing', 'SEO preview updated'],
+        apply() { seoText.textContent = 'SEO: BBQ catering near Cedar Hill & Duncanville, TX'; changed('seoText'); }
+      },
+      {
+        type: 'Photo / visual theme', request: 'Make the photo area feel like a summer cookout.',
+        logs: ['Selecting summer visual direction', 'Updating image placeholder gradient', 'Changing photo caption', 'Visual theme updated'],
+        apply() { setVar('--photo-gradient', 'linear-gradient(135deg,#ffb347,#ff5b61 48%,#2f86ff)'); photoTitle.textContent = 'Summer Cookout'; photoSub.textContent = 'Backyard packs • Cold drinks • Easy pickup'; changed('photoCard'); }
+      },
+      {
+        type: 'Lead form', request: 'Add event size to the catering lead form.',
+        logs: ['Finding lead capture fields', 'Adding event size question', 'Checking owner summary output', 'Lead form updated'],
+        apply() { leadText.textContent = 'Lead form: Name, phone, event date, event size'; changed('leadText'); }
+      },
+      {
+        type: 'Background color', request: 'Change the website background to a clean gray look instead.',
+        logs: ['Reading current theme tokens', 'Switching background to clean gray', 'Checking contrast and spacing', 'Gray theme published'],
+        apply() { setTheme({bg:'#64748b', accent:'#1669d8', banner:'#1e293b', photo:'linear-gradient(135deg,#94a3b8,#334155)', radius:'24px'}); changed('siteInner'); }
+      },
+      {
+        type: 'Business hours', request: 'Change our hours to 10 AM to 5 PM Monday through Friday.',
+        logs: ['Finding hours section', 'Replacing weekday schedule', 'Checking footer/contact snippets', 'Hours updated'],
+        apply() { hoursText.innerHTML = 'Mon–Fri 10 AM–5 PM<br>Saturday by request'; changed('hoursCard'); }
+      },
+      {
+        type: 'Seasonal banner', request: 'Swap the Christmas banner for a summer lunch special.',
+        logs: ['Removing holiday banner', 'Writing summer lunch promo', 'Checking banner length on mobile', 'Summer banner live'],
+        apply() { bannerText.textContent = 'Summer lunch special: brisket sandwich combo every weekday.'; setVar('--site-banner', '#1669d8'); setVar('--site-banner-text', '#ffffff'); changed('bannerText'); }
+      },
+      {
+        type: 'Hero headline', request: 'Change the homepage headline to focus on fast pickup orders.',
+        logs: ['Reviewing hero content', 'Drafting pickup-first headline', 'Updating supporting copy', 'Hero copy published'],
+        apply() { kicker.textContent = 'Fast pickup. Real barbecue.'; heroTitle.textContent = 'Dinner is ready when you are.'; heroCopy.textContent = 'Order slow-smoked favorites for quick pickup after work, weekend family meals, or last-minute guests.'; primaryCta.textContent = 'Start Pickup Order'; changed('siteInner'); }
+      },
+      {
+        type: 'CTA / phone action', request: 'Make the main button say Call for Catering.',
+        logs: ['Finding primary CTA', 'Updating button label', 'Checking action wording', 'CTA updated'],
+        apply() { primaryCta.textContent = 'Call for Catering'; secondaryCta.textContent = 'See Hours'; changed('primaryCta'); }
+      },
+      {
+        type: 'New service', request: 'Replace office lunch delivery with wedding catering.',
+        logs: ['Updating service card', 'Adding wedding catering copy', 'Checking tone', 'Service updated'],
+        apply() { serviceText.textContent = 'Wedding catering, family pickup packs, and neighborhood events.'; changed('serviceCard'); }
+      },
+      {
+        type: 'FAQ update', request: 'Change the FAQ to answer whether we have gluten-free sides.',
+        logs: ['Opening FAQ content', 'Replacing catering notice FAQ', 'Writing clear answer', 'FAQ updated'],
+        apply() { faqText.textContent = 'Do you have gluten-free sides? Ask our team — options may vary by day.'; changed('faqCard'); }
+      },
+      {
+        type: 'SEO settings', request: 'Change SEO focus to family barbecue pickup in Cedar Hill.',
+        logs: ['Drafting updated SEO title', 'Adjusting local keywords', 'Checking natural wording', 'SEO preview updated'],
+        apply() { seoText.textContent = 'SEO: Family barbecue pickup in Cedar Hill, TX'; changed('seoText'); }
+      },
+      {
+        type: 'Photo / visual theme', request: 'Make the photo area feel more premium and smoky.',
+        logs: ['Selecting smoky visual direction', 'Updating photo placeholder', 'Changing image caption', 'Visual theme updated'],
+        apply() { setVar('--photo-gradient', 'linear-gradient(135deg,#111827,#6b2f1a 55%,#e3343f)'); photoTitle.textContent = 'Premium Smoke'; photoSub.textContent = 'Low and slow • Rich flavor • Local favorite'; changed('photoCard'); }
+      },
+      {
+        type: 'Lead form', request: 'Change the lead form to ask for budget instead of event size.',
+        logs: ['Finding lead capture fields', 'Replacing event size with budget', 'Checking owner summary output', 'Lead form updated'],
+        apply() { leadText.textContent = 'Lead form: Name, phone, event date, budget range'; changed('leadText'); }
+      }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const messages = $('messages');
+    const commandLog = document.createElement('div');
+    commandLog.className = 'command-log';
+    const composerText = $('composerText');
+    const runBadge = $('runBadge');
+    const progressStrip = $('progressStrip');
+    const playPause = $('playPause');
+    const nextBtn = $('nextBtn');
+    const restartBtn = $('restartBtn');
+    const sendBtn = $('sendBtn');
+    let index = 0;
+    let playing = true;
+    let timers = [];
+
+    for (let i = 0; i < steps.length; i++) {
+      const tick = document.createElement('div');
+      tick.className = 'tick';
+      progressStrip.appendChild(tick);
+    }
+
+    function setVar(name, value) { document.documentElement.style.setProperty(name, value); }
+    function setTheme(theme) {
+      if (theme.bg) setVar('--site-bg', theme.bg);
+      if (theme.accent) setVar('--site-accent', theme.accent);
+      if (theme.banner) setVar('--site-banner', theme.banner);
+      if (theme.photo) setVar('--photo-gradient', theme.photo);
+      if (theme.radius) setVar('--site-radius', theme.radius);
+    }
+
+    function changed(id) {
+      const el = $(id);
+      if (!el) return;
+      el.classList.remove('changed', 'change-flash');
+      void el.offsetWidth;
+      el.classList.add('changed');
+      $('site').classList.add('change-flash');
+      window.setTimeout(() => $('site').classList.remove('change-flash'), 780);
+    }
+
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+    function wait(fn, delay) { const t = setTimeout(fn, delay); timers.push(t); }
+
+    function addBubble(text, role) {
+      const b = document.createElement('div');
+      b.className = `bubble ${role}`;
+      b.innerHTML = text;
+      messages.appendChild(b);
+      messages.scrollTop = messages.scrollHeight;
+      return b;
+    }
+
+    function typeComposer(text, done) {
+      composerText.textContent = '';
+      let i = 0;
+      function tick() {
+        composerText.innerHTML = text.slice(0, i).replace(/</g, '&lt;') + '<span class="typing"></span>';
+        i += 2;
+        if (i <= text.length + 2) wait(tick, 22);
+        else {
+          composerText.textContent = text;
+          if (done) done();
+        }
+      }
+      tick();
+    }
+
+    function renderProgress() {
+      [...progressStrip.children].forEach((tick, i) => tick.classList.toggle('active', i <= index));
+    }
+
+    function renderStep() {
+      clearTimers();
+      const step = steps[index];
+      runBadge.textContent = `Run ${index + 1} / ${steps.length} • ${step.type}`;
+      renderProgress();
+      messages.innerHTML = '';
+      commandLog.innerHTML = '';
+      composerText.textContent = 'Typing request…';
+
+      typeComposer(step.request, () => {
+        wait(() => {
+          addBubble(step.request, 'customer');
+          composerText.textContent = 'Request sent';
+        }, 160);
+        wait(() => addBubble('<strong>LoneStar AI Assistant:</strong> I can do that. I’ll update the demo site and check the result.', 'agent'), 760);
+        wait(() => {
+          messages.appendChild(commandLog);
+          step.logs.forEach((line, i) => {
+            wait(() => {
+              const div = document.createElement('div');
+              div.className = `log-line ${i === step.logs.length - 1 ? 'ok' : ''}`;
+              div.textContent = `${i === step.logs.length - 1 ? '✓' : '>'} ${line}`;
+              commandLog.appendChild(div);
+            }, i * 430);
+          });
+        }, 1250);
+        wait(() => {
+          step.apply();
+          addBubble('<strong>Done.</strong> The website has been updated. Refresh the phone view and it matches the request.', 'agent');
+        }, 3200);
+        if (playing) wait(nextStep, 6000);
+      });
+    }
+
+    function nextStep() {
+      index = (index + 1) % steps.length;
+      renderStep();
+    }
+
+    playPause.addEventListener('click', () => {
+      playing = !playing;
+      playPause.textContent = playing ? 'Pause demo' : 'Play demo';
+      if (playing) nextStep();
+      else clearTimers();
+    });
+    nextBtn.addEventListener('click', () => { nextStep(); });
+    restartBtn.addEventListener('click', () => { index = 0; playing = true; playPause.textContent = 'Pause demo'; renderStep(); });
+    sendBtn.addEventListener('click', () => { nextStep(); });
+
+    renderStep();
+  </script>
+</body>
+</html>
