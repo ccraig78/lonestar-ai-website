@@ -17,11 +17,11 @@
       --muted: #b8c7dd;
       --glass: rgba(255,255,255,.09);
       --line: rgba(255,255,255,.16);
-      --site-bg: #0b2e67;
+      --site-bg: #64748b;
       --site-card: rgba(255,255,255,.94);
       --site-text: #112033;
-      --site-accent: #2f86ff;
-      --site-banner: #e3343f;
+      --site-accent: #1669d8;
+      --site-banner: #1e293b;
       --site-banner-text: #fff;
       --site-surface: rgba(255,255,255,.88);
       --site-card-bg: rgba(255,255,255,.72);
@@ -333,7 +333,7 @@
       align-items: center;
       gap: 15px;
       padding: 17px 22px;
-      background: var(--site-card);
+      background: var(--site-surface);
       color: var(--site-text);
     }
 
@@ -718,6 +718,39 @@
       if (theme.faint) setVar('--site-faint', theme.faint);
     }
 
+    function resetPreviewToNeutral() {
+      setTheme({
+        bg: '#64748b',
+        accent: '#1669d8',
+        banner: '#1e293b',
+        photo: 'linear-gradient(135deg,#94a3b8,#334155)',
+        radius: '24px',
+        surface: 'rgba(255,255,255,.90)',
+        cardBg: 'rgba(255,255,255,.74)',
+        text: '#112033',
+        muted: 'rgba(17,32,51,.75)',
+        faint: 'rgba(17,32,51,.55)'
+      });
+      siteBanner.classList.remove('scrolling');
+      bannerText.textContent = 'Family platters available all weekend — call ahead.';
+      document.querySelector('.site-nav').classList.remove('centered');
+      newPageLink.hidden = true;
+      setVar('--review-display', 'none');
+      extraCta.classList.remove('show');
+      hoursText.innerHTML = 'Mon–Sat 10 AM–7 PM<br>Sunday 11 AM–4 PM';
+      bizIcon.textContent = 'BBQ';
+      bizIcon.style.borderRadius = '11px';
+      businessName.textContent = 'Cedar Hill BBQ Co.';
+      tagLine.textContent = 'Local family barbecue';
+      serviceText.textContent = 'Family pickup packs and neighborhood catering.';
+      heroTitle.textContent = 'Real Texas barbecue for busy families.';
+      heroCopy.textContent = 'Slow-smoked brisket, ribs, and sides made fresh daily. Order pickup, book catering, or stop by for lunch.';
+      primaryCta.textContent = 'Order Pickup';
+      secondaryCta.textContent = 'Ask a Question';
+      photoTitle.textContent = 'Smoked Daily';
+      photoSub.textContent = 'Brisket • Ribs • Sausage';
+    }
+
     function changed(id) {
       const el = $(id);
       if (!el) return;
@@ -761,6 +794,7 @@
 
     function renderStep() {
       clearTimers();
+      if (index === 0) resetPreviewToNeutral();
       const step = steps[index];
       runBadge.textContent = `Run ${index + 1} / ${steps.length} • ${step.type}`;
       renderProgress();
