@@ -10,6 +10,12 @@
     <style>
       .live-hero { min-height: auto; }
       .live-hero .hero-grid { align-items: start; }
+      .live-hero h1 span,
+      .live-demo-white-red .brand-lone,
+      .live-demo-white-red .eyebrow:not(.blue),
+      .live-demo-white-red .customer-kicker {
+        color: white;
+      }
       .live-proof-card {
         border: 1px solid rgba(255,255,255,.14);
         border-radius: 24px;
@@ -93,7 +99,17 @@
       }
       .customer-header nav { display: flex; gap: 14px; flex-wrap: wrap; font-size: .88rem; color: rgba(255,255,255,.76); font-weight: 800; }
       .customer-main { padding: clamp(22px, 4vw, 38px); }
-      .customer-kicker { color: #e3343f; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; font-size: .74rem; }
+      .customer-kicker {
+        color: white;
+        display: inline-block;
+        padding: 6px 9px;
+        border-radius: 999px;
+        background: #17324f;
+        font-weight: 950;
+        letter-spacing: .13em;
+        text-transform: uppercase;
+        font-size: .74rem;
+      }
       .customer-main h2 { color: #142033; margin: 8px 0 12px; font-size: clamp(2rem, 4vw, 3.3rem); line-height: 1; letter-spacing: -.055em; }
       .customer-main p { color: rgba(20,32,51,.72); line-height: 1.58; max-width: 680px; }
       .customer-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
@@ -217,7 +233,7 @@
       }
     </style>
   </head>
-  <body>
+  <body class="live-demo-white-red">
     <header class="site-header">
       <a class="brand" href="index.html#top" aria-label="LoneStar AI home">
         <img src="assets/images/ls-star-rounded-gradient.svg" alt="LoneStar AI logo" />
