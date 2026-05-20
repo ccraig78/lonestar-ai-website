@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LoneStar Mission Control</title>
+  <meta name="description" content="A private mission control dashboard concept for Clint's AI agent crew." />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name="theme-color" content="#050816" />
+  <link rel="preload" as="image" href="assets/images/ls-star-rounded-gradient.png" />
+  <link rel="stylesheet" href="assets/css/mission-control.css" />
+</head>
+<body>
+  <div class="backdrop-logo" aria-hidden="true"><img id="backdropLogoImg" src="assets/images/ls-star-rounded-gradient.png" alt="" /></div>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <main class="mission-shell">
+    <header class="mission-header">
+      <a class="mission-brand" href="index.html" aria-label="Back to LoneStar home">
+        <img src="assets/images/ls-star-rounded-gradient.png" alt="" />
+        <span>
+          <strong>LoneStar</strong>
+          <small>Mission Control</small>
+        </span>
+      </a>
+      <div class="mission-actions">
+        <button class="chip-button" type="button" id="briefingBtn">Generate briefing</button>
+        <button class="chip-button settings-button" type="button" id="settingsBtn" aria-haspopup="dialog" aria-controls="settingsPanel">Settings</button>
+        <a class="chip-button logout-link" href="/logout" id="logoutLink">Logout</a>
+      </div>
+    </header>
+
+    <section class="hero-console glass-panel">
+      <div>
+        <p class="eyebrow">Private AI crew cockpit</p>
+        <h1>Message the agents. Track the work. Keep the chaos useful.</h1>
+        <p class="lede">A sleek command center concept for Buddy, Codi, Euro, Stella, Grok, and whatever weirdly useful agent joins the crew next.</p>
+      </div>
+      <div class="system-readout" aria-label="Mission Control system readout">
+        <div><span>Mode</span><strong id="modeReadout">Prototype</strong></div>
+        <div><span>Backend</span><strong id="backendReadout">Checking…</strong></div>
+        <div><span>Crew</span><strong id="crewReadout">5 agents</strong></div>
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <section class="agent-rack glass-panel" aria-labelledby="agentsTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Crew status</p>
+            <h2 id="agentsTitle">Agents</h2>
+          </div>
+          <span class="live-pill" id="connectionPill"><i></i> Local UI</span>
+        </div>
+
+        <div class="agent-cards" id="agentCards"></div>
+      </section>
+
+      <section class="command-center glass-panel" aria-labelledby="messageTitle">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Command channel</p>
+            <h2 id="messageTitle">Message Center</h2>
+          </div>
+          <button class="tiny-button" type="button" id="clearLogBtn">Clear log</button>
+        </div>
+
+        <div class="recipient-row" id="recipientRow" aria-label="Choose recipients"></div>
+
+        <label class="message-label" for="messageInput">Message</label>
+        <textarea id="messageInput" rows="5" placeholder="Ask Buddy what he is working on, send Codi a research task, or broadcast to the whole crew..."></textarea>
+
+        <div class="send-row">
+          <button class="primary-button" type="button" id="sendBtn">Send command</button>
+          <button class="ghost-button" type="button" id="allBtn">Ask all: status check</button>
+        </div>
+
+        <div class="transcript" id="transcript" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <section class="lower-grid">
+      <section class="glass-panel task-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Operations</p>
+            <h2>Active tasks</h2>
+          </div>
+        </div>
+        <div class="task-list" id="taskList"></div>
+      </section>
+
+      <section class="glass-panel project-panel">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Projects</p>
+            <h2>Project boards</h2>
+          </div>
+        </div>
+        <div class="project-grid" id="projectGrid"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog class="settings-panel" id="settingsPanel">
+    <form method="dialog" class="settings-card">
+      <div class="settings-top">
+        <div>
+          <p class="eyebrow">Visual controls</p>
+          <h2>Mission Control Settings</h2>
+        </div>
+        <button class="close-button" type="submit" aria-label="Close settings">×</button>
+      </div>
+
+      <div class="settings-grid">
+        <fieldset class="setting-group">
+          <legend>Background gradient</legend>
+          <div class="color-row"><label>Start <input type="color" data-setting="bgA" /></label><label>End <input type="color" data-setting="bgB" /></label></div>
+          <label class="range-label">Angle <input type="range" min="0" max="360" data-setting="bgAngle" /></label>
+        </fieldset>
+
+        <fieldset class="setting-group">
+          <legend>Normal text gradient</legend>
+          <div class="color-row"><label>Primary <input type="color" data-setting="textA" /></label><label>Secondary <input type="color" data-setting="textB" /></label></div>
+          <label class="range-label">Glow <input type="range" min="0" max="100" data-setting="textGlow" /></label>
+        </fieldset>
+
+        <fieldset class="setting-group">
+          <legend>Highlight / bold gradient</legend>
+          <div class="color-row"><label>Start <input type="color" data-setting="accentA" /></label><label>End <input type="color" data-setting="accentB" /></label></div>
+          <label class="range-label">Intensity <input type="range" min="0" max="100" data-setting="accentGlow" /></label>
+        </fieldset>
+
+        <fieldset class="setting-group logo-controls">
+          <legend>Background logo</legend>
+          <label class="range-label">Opacity <input type="range" min="0" max="100" data-setting="logoOpacity" /></label>
+          <label class="range-label">Size <input type="range" min="35" max="125" data-setting="logoSize" /></label>
+          <label class="file-label">Swap logo/image <input type="file" id="logoFile" accept="image/*" /></label>
+          <label class="url-label">Or image URL/path <input type="text" id="logoUrl" placeholder="assets/images/ls-star-rounded-gradient.png" /></label>
+        </fieldset>
+
+        <fieldset class="setting-group full-width">
+          <legend>Dashboard cards</legend>
+          <label class="range-label">Card opacity <input type="range" min="18" max="92" data-setting="cardOpacity" /></label>
+        </fieldset>
+      </div>
+
+      <div class="settings-footer">
+        <button class="ghost-button" type="button" id="resetThemeBtn">Reset theme</button>
+        <button class="primary-button" type="submit">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="assets/js/mission-control.js"></script>
+</body>
+</html>
