@@ -59,13 +59,24 @@ const MIME = {
   '.glb': 'model/gltf-binary'
 };
 
-const agents = [
-  { id: 'buddy', name: 'Buddy', emoji: '🦞', status: OPENCLAW_ENABLED ? 'Live' : 'Online', role: 'Primary continuity, coding, workspace ops', currentWork: OPENCLAW_ENABLED ? 'Live via OpenClaw Gateway' : 'Mission Control backend shell' },
-  { id: 'stella', name: 'Stella', emoji: '⭐', status: OPENCLAW_ENABLED ? 'Live' : 'Idle', role: 'LoneStar archive and website-control persona', currentWork: OPENCLAW_ENABLED ? 'Live via OpenClaw Gateway' : 'Idle' },
-  { id: 'codi', name: 'Codi', emoji: '⚡', status: OPENCLAW_AGENT_MAP.codi ? 'Live' : 'Unmapped', role: 'CEO brain, pressure-testing, focused execution', currentWork: OPENCLAW_AGENT_MAP.codi ? 'Live via configured OpenClaw agent' : 'Visible here; direct routing not configured yet' },
-  { id: 'euro', name: 'Euro', emoji: '🛻', status: OPENCLAW_AGENT_MAP.euro ? 'Live' : 'Unmapped', role: 'Better Beds / Roadie business context', currentWork: OPENCLAW_AGENT_MAP.euro ? 'Live via configured OpenClaw agent' : 'Visible here; direct routing not configured yet' },
-  { id: 'grok', name: 'Codi-Grok', emoji: '𝕏', status: OPENCLAW_AGENT_MAP.grok ? 'Live' : 'On demand', role: 'Grok 4.3 outside perspective through Codi/Hermes', currentWork: OPENCLAW_AGENT_MAP.grok ? 'Live via configured OpenClaw agent' : 'Available through Codi/Hermes; direct routing not configured yet' }
-];
+const AGENT_PROFILES = {
+  buddy: { name: 'Buddy', emoji: '🦞', role: 'Primary continuity, coding, workspace ops' },
+  stella: { name: 'Stella', emoji: '⭐', role: 'LoneStar archive and website-control persona' },
+  codi: { name: 'Codi', emoji: '⚡', role: 'CEO brain, pressure-testing, focused execution' },
+  euro: { name: 'Euro', emoji: '🛻', role: 'Better Beds / Roadie business context' },
+  grok: { name: 'Codi-Grok', emoji: '𝕏', role: 'Grok 4.3 outside perspective through Codi/Hermes' }
+};
+
+const AGENT_ID_ALIASES = {
+  main: 'buddy',
+  buddy: 'buddy',
+  lonestar: 'stella',
+  stella: 'stella',
+  codi: 'codi',
+  euro: 'euro',
+  grok: 'grok',
+  'codi-grok': 'grok'
+};
 
 const conversations = [];
 
@@ -151,22 +162,97 @@ function extractOpenClawText(stdout) {
   }
 }
 
-function runOpenClawAgent(agentId, message) {
+function execOpenClaw(args, options = {}) {
   return new Promise((resolve) => {
-    const args = ['agent', '--agent', agentId, '--message', message, '--json', '--timeout', '180'];
     execFile(OPENCLAW_BIN, args, {
       cwd: ROOT,
-      timeout: 190000,
-      maxBuffer: 1024 * 1024 * 4,
+      timeout: options.timeout || 25000,
+      maxBuffer: options.maxBuffer || 1024 * 1024 * 4,
       env: { ...process.env, PATH: `${path.dirname(OPENCLAW_BIN)}:${process.env.PATH || ''}` }
     }, (err, stdout, stderr) => {
-      if (err) {
-        resolve({ ok: false, text: `OpenClaw call failed for ${agentId}: ${stderr || err.message}` });
-        return;
-      }
-      resolve({ ok: true, text: extractOpenClawText(stdout) });
+      if (err) return resolve({ ok: false, stdout, stderr: stderr || err.message });
+      resolve({ ok: true, stdout, stderr });
     });
   });
+}
+
+function agentProfileFor(publicId, fallback = {}) {
+  const profile = AGENT_PROFILES[publicId] || {};
+  return {
+    id: publicId,
+    name: profile.name || fallback.identityName || fallback.name || publicId,
+    emoji: profile.emoji || fallback.identityEmoji || '🤖',
+    role: profile.role || fallback.role || `OpenClaw agent ${fallback.id || publicId}`
+  };
+}
+
+async function discoverAgents() {
+  const byPublicId = new Map();
+  const add = (agent) => {
+    if (!agent?.id) return;
+    byPublicId.set(agent.id, { ...(byPublicId.get(agent.id) || {}), ...agent });
+  };
+
+  const configured = Object.entries(OPENCLAW_AGENT_MAP).filter(([, mapped]) => Boolean(mapped));
+  for (const [publicId, mappedAgent] of configured) {
+    const profile = agentProfileFor(publicId);
+    add({
+      ...profile,
+      mappedAgent,
+      routable: OPENCLAW_ENABLED,
+      status: OPENCLAW_ENABLED ? 'Live' : 'Configured',
+      currentWork: OPENCLAW_ENABLED ? `Live via OpenClaw agent ${mappedAgent}` : `Configured as ${mappedAgent}; live routing is off`
+    });
+  }
+
+  const listed = await execOpenClaw(['agents', 'list', '--json'], { timeout: 20000 });
+  if (listed.ok) {
+    try {
+      const localAgents = JSON.parse(listed.stdout);
+      if (Array.isArray(localAgents)) {
+        for (const local of localAgents) {
+          const publicId = AGENT_ID_ALIASES[local.id] || local.id;
+          const profile = agentProfileFor(publicId, local);
+          const mappedAgent = Object.entries(OPENCLAW_AGENT_MAP).find(([, id]) => id === local.id)?.[1] || local.id;
+          add({
+            ...profile,
+            mappedAgent,
+            routable: OPENCLAW_ENABLED,
+            status: OPENCLAW_ENABLED ? 'Live' : 'Available',
+            model: local.model,
+            workspace: local.workspace,
+            currentWork: OPENCLAW_ENABLED ? `Live via OpenClaw agent ${local.id}` : `Local OpenClaw agent ${local.id} discovered`
+          });
+        }
+      }
+    } catch {
+      // Discovery is best effort; configured agents still work.
+    }
+  }
+
+  for (const publicId of ['codi', 'euro', 'grok']) {
+    if (!byPublicId.has(publicId)) {
+      const profile = agentProfileFor(publicId);
+      add({
+        ...profile,
+        mappedAgent: '',
+        routable: false,
+        status: publicId === 'grok' ? 'On demand' : 'Unmapped',
+        currentWork: publicId === 'grok'
+          ? 'Available through Codi/Hermes; direct Mission Control routing not configured yet'
+          : 'Visible here; direct Mission Control routing not configured yet'
+      });
+    }
+  }
+
+  return Array.from(byPublicId.values());
+}
+
+async function runOpenClawAgent(agentId, message) {
+  const args = ['agent', '--agent', agentId, '--message', message, '--json', '--timeout', '180'];
+  const result = await execOpenClaw(args, { timeout: 190000 });
+  if (!result.ok) return { ok: false, text: `OpenClaw call failed for ${agentId}: ${result.stderr}` };
+  return { ok: true, text: extractOpenClawText(result.stdout) };
 }
 
 function loginPage(error = '') {
@@ -231,10 +317,12 @@ async function handle(req, res) {
 
   if (url.pathname === '/api/agents') {
     const session = requireAuth(req, res); if (!session) return;
+    const discoveredAgents = await discoverAgents();
     return json(res, 200, {
-      agents,
+      agents: discoveredAgents,
       openclaw: {
         enabled: OPENCLAW_ENABLED,
+        binary: OPENCLAW_BIN,
         wiredAgents: Object.fromEntries(Object.entries(OPENCLAW_AGENT_MAP).filter(([, value]) => Boolean(value)))
       }
     });
@@ -255,11 +343,12 @@ async function handle(req, res) {
     const outbound = { id: crypto.randomUUID(), time: now, from: session.username, recipients, text, type: 'outbound' };
     conversations.push(outbound);
 
+    const discoveredAgents = await discoverAgents();
     const replies = [];
     for (const id of recipients) {
-      const agent = agents.find(a => a.id === id) || { id, name: id };
+      const agent = discoveredAgents.find(a => a.id === id) || { id, name: id };
       let replyText = 'Prototype backend received this command. Set MISSION_OPENCLAW_ENABLED=1 and configure agent mappings to send live OpenClaw turns.';
-      const mappedAgent = OPENCLAW_AGENT_MAP[id];
+      const mappedAgent = agent.mappedAgent || OPENCLAW_AGENT_MAP[id];
       if (OPENCLAW_ENABLED && mappedAgent) {
         const prompt = `Message from Clint via private LoneStar Mission Control. Reply for Mission Control, concise unless Clint asks for detail.\n\nClint says: ${text}`;
         const result = await runOpenClawAgent(mappedAgent, prompt);

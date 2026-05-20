@@ -85,28 +85,38 @@ async function api(path, options = {}) {
   return res.json();
 }
 
+async function refreshAgents({ announce = false, keepSelection = true } = {}) {
+  const previous = new Set(selected);
+  const data = await api('/api/agents');
+  if (!Array.isArray(data.agents)) return data;
+  backendAvailable = true;
+  document.body.classList.add('backend-connected');
+  $('#modeReadout').textContent = data.openclaw?.enabled ? 'Live agents' : 'Private';
+  $('#backendReadout').textContent = data.openclaw?.enabled ? 'OpenClaw live' : 'Connected';
+  $('#connectionPill').innerHTML = '<i></i> Backend live';
+  agents = data.agents.map(agent => ({
+    ...agent,
+    note: agent.currentWork || agent.note || 'Ready.'
+  }));
+  const routableAgents = agents.filter(agent => agent.routable !== false);
+  selected = keepSelection
+    ? new Set([...previous].filter(id => agents.some(agent => agent.id === id)))
+    : new Set();
+  if (!selected.size) selected.add((routableAgents[0] || agents[0])?.id || 'buddy');
+  renderAgents();
+  $('#crewReadout').textContent = `${routableAgents.length}/${agents.length} live`;
+  if (announce) addBubble('Mission Control', `<b>Agent roster refreshed.</b> ${routableAgents.length} live agent${routableAgents.length === 1 ? '' : 's'} available.`);
+  return data;
+}
+
 async function hydrateFromBackend() {
   try {
-    const data = await api('/api/agents');
-    if (Array.isArray(data.agents)) {
-      backendAvailable = true;
-      document.body.classList.add('backend-connected');
-      $('#modeReadout').textContent = data.openclaw?.enabled ? 'Live agents' : 'Private';
-      $('#backendReadout').textContent = data.openclaw?.enabled ? 'OpenClaw live' : 'Connected';
-      $('#connectionPill').innerHTML = '<i></i> Backend live';
-      agents = data.agents.map(agent => ({
-        ...agent,
-        note: agent.currentWork || agent.note || 'Ready.'
-      }));
-      selected = new Set([agents[0]?.id || 'buddy']);
-      renderAgents();
-      $('#crewReadout').textContent = `${agents.length} agents`;
-      await hydrateMessages();
-      const liveNote = data.openclaw?.enabled
-        ? '<b>Backend connected.</b> Live OpenClaw routing is enabled for mapped agents. Sends may take a few seconds because real agents are answering.'
-        : '<b>Backend connected.</b> Login/API wrapper is active. Agent messages use safe prototype replies until OpenClaw/AgentBus routing is enabled.';
-      addBubble('Mission Control', liveNote);
-    }
+    const data = await refreshAgents({ keepSelection: false });
+    await hydrateMessages();
+    const liveNote = data.openclaw?.enabled
+      ? '<b>Backend connected.</b> Live OpenClaw routing is enabled for mapped/discovered agents. Sends may take a few seconds because real agents are answering.'
+      : '<b>Backend connected.</b> Login/API wrapper is active. Agent messages use safe prototype replies until OpenClaw/AgentBus routing is enabled.';
+    addBubble('Mission Control', liveNote);
   } catch {
     backendAvailable = false;
     $('#modeReadout').textContent = 'Prototype';
@@ -134,24 +144,24 @@ async function hydrateMessages() {
 
 function renderAgents() {
   $('#agentCards').innerHTML = agents.map(agent => `
-    <article class="agent-card">
+    <article class="agent-card ${agent.routable === false ? 'unmapped' : 'routable'}">
       <div class="avatar" aria-hidden="true">${escapeHtml(agent.emoji)}</div>
       <div class="agent-main">
         <strong>${escapeHtml(agent.name)}</strong>
         <small>${escapeHtml(agent.role)}</small>
         <small>${escapeHtml(agent.note || agent.currentWork || '')}</small>
       </div>
-      <div class="agent-status"><b>${escapeHtml(agent.status)}</b><span>${escapeHtml(agent.id)}</span></div>
+      <div class="agent-status"><b>${escapeHtml(agent.status)}</b><span>${escapeHtml(agent.mappedAgent || agent.id)}</span></div>
     </article>
   `).join('');
 
   $('#recipientRow').innerHTML = agents.map(agent => `
-    <button class="recipient-chip ${selected.has(agent.id) ? 'active' : ''}" type="button" data-agent="${escapeHtml(agent.id)}">${escapeHtml(agent.emoji)} ${escapeHtml(agent.name)}</button>
-  `).join('') + '<button class="recipient-chip" type="button" data-agent="all">All agents</button>';
+    <button class="recipient-chip ${selected.has(agent.id) ? 'active' : ''} ${agent.routable === false ? 'unmapped' : ''}" type="button" data-agent="${escapeHtml(agent.id)}" title="${escapeHtml(agent.routable === false ? 'Visible but not directly routed yet' : 'Live route available')}">${escapeHtml(agent.emoji)} ${escapeHtml(agent.name)}</button>
+  `).join('') + '<button class="recipient-chip" type="button" data-agent="all">All live agents</button>';
 
   $$('.recipient-chip').forEach(btn => btn.addEventListener('click', () => {
     const id = btn.dataset.agent;
-    if (id === 'all') selected = new Set(agents.map(a => a.id));
+    if (id === 'all') selected = new Set(agents.filter(a => a.routable !== false).map(a => a.id));
     else if (selected.has(id)) { selected.delete(id); if (!selected.size) selected.add(id); }
     else selected.add(id);
     renderAgents();
@@ -170,12 +180,18 @@ function renderTasks() {
   `).join('');
 }
 
-function addBubble(author, text, type = 'agent', trustedHtml = true) {
+function addBubble(author, text, type = 'agent', trustedHtml = true, id = '') {
   const transcript = $('#transcript');
   const bubble = document.createElement('div');
   bubble.className = `bubble ${type}`;
+  if (id) bubble.dataset.bubbleId = id;
   bubble.innerHTML = `<small>${escapeHtml(author)}</small><p>${trustedHtml ? text : escapeHtml(text)}</p>`;
   transcript.prepend(bubble);
+}
+
+function removeBubble(id) {
+  const bubble = document.querySelector(`[data-bubble-id="${CSS.escape(id)}"]`);
+  if (bubble) bubble.remove();
 }
 
 async function sendMessage(textOverride) {
@@ -189,10 +205,13 @@ async function sendMessage(textOverride) {
 
   if (backendAvailable) {
     try {
+      const pendingId = `pending-${Date.now()}`;
+      addBubble('Mission Control', `Sending to ${escapeHtml(names.join(', '))}…`, 'agent', false, pendingId);
       const data = await api('/api/message', {
         method: 'POST',
         body: JSON.stringify({ recipients: recipients.map(a => a.id), message: text })
       });
+      removeBubble(pendingId);
       (data.replies || []).forEach(reply => addBubble(reply.from || reply.agentId || 'Agent', reply.text || '', 'agent', false));
       return;
     } catch (err) {
@@ -244,8 +263,15 @@ function setupActions() {
   $('#messageInput').addEventListener('keydown', (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') sendMessage();
   });
+  $('#refreshAgentsBtn').addEventListener('click', async () => {
+    try {
+      await refreshAgents({ announce: true });
+    } catch (err) {
+      addBubble('Mission Control', `<b>Refresh failed:</b> ${escapeHtml(err.message)}`);
+    }
+  });
   $('#allBtn').addEventListener('click', () => {
-    selected = new Set(agents.map(a => a.id));
+    selected = new Set(agents.filter(a => a.routable !== false).map(a => a.id));
     renderAgents();
     sendMessage('Crew status check: what are you working on, what is blocked, and what needs Clint’s attention?');
   });
