@@ -70,6 +70,7 @@ To let the backend call local OpenClaw agents, set:
 
 ```bash
 export MISSION_OPENCLAW_ENABLED=1
+export MISSION_OPENCLAW_BIN=/home/clint-craig/.npm-global/bin/openclaw
 export MISSION_AGENT_BUDDY=main
 export MISSION_AGENT_STELLA=lonestar
 # Optional, only if these OpenClaw agent ids exist locally:
@@ -78,4 +79,22 @@ export MISSION_AGENT_STELLA=lonestar
 # export MISSION_AGENT_GROK=codi-grok
 ```
 
-The server then runs `openclaw agent --agent <id> --message ... --json` from the backend. This keeps browser JavaScript free of OpenClaw tokens/secrets, but it does mean every live send can spend model tokens.
+Current local live routing:
+
+- Buddy → OpenClaw agent `main`
+- Stella → OpenClaw agent `lonestar`
+- Codi / Euro / Grok stay visible in the UI, but return an unmapped notice until real OpenClaw agent ids are configured.
+
+The server then runs `openclaw agent --agent <id> --message ... --json` from the backend. This keeps browser JavaScript free of OpenClaw tokens/secrets, but it does mean every live send can spend model tokens and may take several seconds.
+
+## Public access / security
+
+GitHub Pages can only serve the static prototype. Real login and live agent routing require traffic to reach this Node backend.
+
+Recommended final public setup:
+
+1. Put Cloudflare in front of `lonestaraiassistants.com`.
+2. Run a Cloudflare Tunnel from this computer or a VPS to `http://127.0.0.1:8787`.
+3. Keep Mission Control behind the Node login, and optionally add Cloudflare Access as a second lock.
+
+Until that routing is done, `https://lonestaraiassistants.com/mission.html` is a static visual prototype and the working private version is local at `http://127.0.0.1:8787/mission.html`.

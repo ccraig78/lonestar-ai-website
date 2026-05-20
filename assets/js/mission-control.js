@@ -91,8 +91,8 @@ async function hydrateFromBackend() {
     if (Array.isArray(data.agents)) {
       backendAvailable = true;
       document.body.classList.add('backend-connected');
-      $('#modeReadout').textContent = 'Private';
-      $('#backendReadout').textContent = 'Connected';
+      $('#modeReadout').textContent = data.openclaw?.enabled ? 'Live agents' : 'Private';
+      $('#backendReadout').textContent = data.openclaw?.enabled ? 'OpenClaw live' : 'Connected';
       $('#connectionPill').innerHTML = '<i></i> Backend live';
       agents = data.agents.map(agent => ({
         ...agent,
@@ -102,7 +102,10 @@ async function hydrateFromBackend() {
       renderAgents();
       $('#crewReadout').textContent = `${agents.length} agents`;
       await hydrateMessages();
-      addBubble('Mission Control', '<b>Backend connected.</b> Login/API wrapper is active. Agent messages use safe prototype replies until OpenClaw/AgentBus routing is enabled.');
+      const liveNote = data.openclaw?.enabled
+        ? '<b>Backend connected.</b> Live OpenClaw routing is enabled for mapped agents. Sends may take a few seconds because real agents are answering.'
+        : '<b>Backend connected.</b> Login/API wrapper is active. Agent messages use safe prototype replies until OpenClaw/AgentBus routing is enabled.';
+      addBubble('Mission Control', liveNote);
     }
   } catch {
     backendAvailable = false;
