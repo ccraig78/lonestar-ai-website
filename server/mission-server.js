@@ -253,7 +253,7 @@ async function agentBusRequest(path, { method = 'GET', token = '', body = null }
   return JSON.parse(text || '{}');
 }
 
-async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId) {
+async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId, sentAt = '') {
   const env = parseEnvFile(AGENTBUS_ENV_FILE);
   const inboxAgent = env.AGENTBUS_AGENT || 'Buddy';
   const deadline = Date.now() + AGENTBUS_REPLY_WAIT_MS;
@@ -262,13 +262,26 @@ async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId) {
     try {
       const qs = new URLSearchParams({ agent: inboxAgent, token: env.AGENTBUS_AGENT_TOKEN || '', limit: '80' });
       const data = await agentBusRequest(`/api/messages?${qs}`);
-      const reply = (data.messages || []).find(message => (
+      const messages = data.messages || [];
+      const sameThreadReply = messages.find(message => (
         message.thread_id === threadId &&
         message.sender === fromAgent &&
         message.recipient === inboxAgent &&
         message.id !== sinceMessageId
       ));
-      if (reply) return reply;
+      if (sameThreadReply) return { ...sameThreadReply, matchedBy: 'thread' };
+
+      // Euro's current AgentBus processor can reply on a fresh thread. Prefer
+      // same-thread matches, but fall back to a recent Mission Control-looking
+      // reply so Clint still sees Euro's answer while the VPS side is corrected.
+      const looseReply = messages.find(message => (
+        message.sender === fromAgent &&
+        message.recipient === inboxAgent &&
+        message.id !== sinceMessageId &&
+        (!sentAt || String(message.created_at || '') >= sentAt) &&
+        (/mission control/i.test(message.subject || '') || /mission control/i.test(message.body || ''))
+      ));
+      if (looseReply) return { ...looseReply, matchedBy: 'recent' };
     } catch {
       // Keep waiting; transient AgentBus read failures should not kill the whole send.
     }
@@ -296,8 +309,11 @@ async function runAgentBusAgent(to, message) {
       }
     });
     const sent = data.message || {};
-    const reply = await waitForAgentBusReply(threadId, to, sent.id);
-    if (reply) return { ok: true, text: reply.body || `${to} replied with an empty AgentBus message.` };
+    const reply = await waitForAgentBusReply(threadId, to, sent.id, sent.created_at);
+    if (reply) {
+      const note = reply.matchedBy === 'recent' ? '\n\n(Found as a recent Euro reply; Euro did not preserve the AgentBus thread id.)' : '';
+      return { ok: true, text: (reply.body || `${to} replied with an empty AgentBus message.`) + note };
+    }
     return { ok: true, text: `Sent to ${to} through AgentBus and waited ${Math.round(AGENTBUS_REPLY_WAIT_MS / 1000)}s, but no same-thread reply arrived yet. Message id: ${sent.id || 'unknown'}.` };
   } catch (err) {
     return { ok: false, text: `AgentBus send failed for ${to}: ${err.message}` };
