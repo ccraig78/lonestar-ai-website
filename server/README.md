@@ -84,10 +84,10 @@ Current local live routing:
 - Buddy → OpenClaw agent `main`
 - Stella → OpenClaw agent `lonestar`
 - Codi → ACP/acpx alias `codi` (`hermes acp`)
-- Euro → AgentBus recipient `Euro` using `/etc/agentbus/Buddy.env`
+- Euro → AgentBus recipient `Euro` using `/etc/agentbus/Buddy.env`; Mission Control sends a unique thread id, asks Euro to reply on that thread, then polls Buddy’s AgentBus inbox for up to `MISSION_AGENTBUS_REPLY_WAIT_MS`.
 - Codi-Grok → local `grok -z` wrapper
 
-The server runs each route from the backend. This keeps browser JavaScript free of OpenClaw/Hermes/AgentBus tokens and local paths, but it does mean every live send can spend model tokens and may take several seconds. Euro’s AgentBus route is currently a doorbell/send route; it confirms delivery to AgentBus rather than waiting for a full Euro reply.
+The server runs each route from the backend. This keeps browser JavaScript free of OpenClaw/Hermes/AgentBus tokens and local paths, but it does mean every live send can spend model tokens and may take several seconds. Euro depends on the VPS AgentBus listener and Euro’s ability to reply on the same AgentBus thread; if no reply arrives before the timeout, Mission Control reports the sent message id.
 
 ## Public access / security
 

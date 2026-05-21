@@ -41,6 +41,8 @@ const OPENCLAW_BIN = process.env.MISSION_OPENCLAW_BIN || '/home/clint-craig/.npm
 const ACPX_BIN = process.env.MISSION_ACPX_BIN || '/home/clint-craig/.openclaw/npm/node_modules/.bin/acpx';
 const GROK_BIN = process.env.MISSION_GROK_BIN || '/home/clint-craig/.local/bin/grok';
 const AGENTBUS_SEND_BIN = process.env.MISSION_AGENTBUS_SEND_BIN || '/home/clint-craig/shared-workspace/agentbus/agentbus-send.py';
+const AGENTBUS_REPLY_WAIT_MS = Number(process.env.MISSION_AGENTBUS_REPLY_WAIT_MS || 90000);
+const AGENTBUS_POLL_MS = Number(process.env.MISSION_AGENTBUS_POLL_MS || 3500);
 const AGENTBUS_ENV_FILE = process.env.MISSION_AGENTBUS_ENV_FILE || '/etc/agentbus/Buddy.env';
 const OPENCLAW_AGENT_MAP = {
   buddy: process.env.MISSION_AGENT_BUDDY || 'main',
@@ -229,20 +231,76 @@ async function runGrokAgent(message) {
   return { ok: true, text: result.stdout.trim() || 'Grok returned no visible text.' };
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function agentBusRequest(path, { method = 'GET', token = '', body = null } = {}) {
+  const env = parseEnvFile(AGENTBUS_ENV_FILE);
+  const busUrl = (env.AGENTBUS_URL || '').replace(/\/$/, '');
+  const agent = env.AGENTBUS_AGENT || 'Buddy';
+  const agentToken = token || env.AGENTBUS_AGENT_TOKEN || '';
+  if (!busUrl || !agentToken) throw new Error('AgentBus URL/token not configured');
+  const headers = { 'X-AgentBus-Token': agentToken };
+  const options = { method, headers };
+  if (body) {
+    headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify({ ...body, token: agentToken });
+  }
+  const res = await fetch(`${busUrl}${path}`, options);
+  const text = await res.text();
+  if (!res.ok) throw new Error(`AgentBus ${res.status}: ${text.slice(0, 300)}`);
+  return JSON.parse(text || '{}');
+}
+
+async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId) {
+  const env = parseEnvFile(AGENTBUS_ENV_FILE);
+  const inboxAgent = env.AGENTBUS_AGENT || 'Buddy';
+  const deadline = Date.now() + AGENTBUS_REPLY_WAIT_MS;
+  while (Date.now() < deadline) {
+    await sleep(AGENTBUS_POLL_MS);
+    try {
+      const qs = new URLSearchParams({ agent: inboxAgent, token: env.AGENTBUS_AGENT_TOKEN || '', limit: '80' });
+      const data = await agentBusRequest(`/api/messages?${qs}`);
+      const reply = (data.messages || []).find(message => (
+        message.thread_id === threadId &&
+        message.sender === fromAgent &&
+        message.recipient === inboxAgent &&
+        message.id !== sinceMessageId
+      ));
+      if (reply) return reply;
+    } catch {
+      // Keep waiting; transient AgentBus read failures should not kill the whole send.
+    }
+  }
+  return null;
+}
+
 async function runAgentBusAgent(to, message) {
   const env = parseEnvFile(AGENTBUS_ENV_FILE);
-  const subject = 'Mission Control message';
-  const result = await execFileText('python3', [AGENTBUS_SEND_BIN, '--to', to, '--subject', subject, '--body', message, '--priority', 'normal', '--kind', 'message'], {
-    timeout: 30000,
-    env
-  });
-  if (!result.ok) return { ok: false, text: `AgentBus send failed for ${to}: ${result.stderr}` };
+  const sender = env.AGENTBUS_AGENT || 'Buddy';
+  const threadId = crypto.randomUUID();
+  const body = `${message}\n\nMission Control request: please reply to ${sender} through AgentBus on this same thread ID: ${threadId}`;
   try {
-    const data = JSON.parse(result.stdout);
-    const msg = data.message || {};
-    return { ok: true, text: `Sent to ${to} through AgentBus. Status: ${msg.status || 'sent'}. Message id: ${msg.id || 'unknown'}.` };
-  } catch {
-    return { ok: true, text: `Sent to ${to} through AgentBus.` };
+    const data = await agentBusRequest('/api/messages', {
+      method: 'POST',
+      body: {
+        from: sender,
+        to,
+        subject: 'Mission Control message',
+        body,
+        priority: 'normal',
+        kind: 'message',
+        wake: true,
+        threadId
+      }
+    });
+    const sent = data.message || {};
+    const reply = await waitForAgentBusReply(threadId, to, sent.id);
+    if (reply) return { ok: true, text: reply.body || `${to} replied with an empty AgentBus message.` };
+    return { ok: true, text: `Sent to ${to} through AgentBus and waited ${Math.round(AGENTBUS_REPLY_WAIT_MS / 1000)}s, but no same-thread reply arrived yet. Message id: ${sent.id || 'unknown'}.` };
+  } catch (err) {
+    return { ok: false, text: `AgentBus send failed for ${to}: ${err.message}` };
   }
 }
 
