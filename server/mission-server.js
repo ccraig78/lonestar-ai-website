@@ -387,7 +387,8 @@ async function discoverAgents() {
       const localAgents = JSON.parse(listed.stdout);
       if (Array.isArray(localAgents)) {
         for (const local of localAgents) {
-          const publicId = AGENT_ID_ALIASES[local.id] || local.id;
+          const identityAlias = AGENT_ID_ALIASES[String(local.identityName || '').toLowerCase()];
+          const publicId = identityAlias || AGENT_ID_ALIASES[local.id] || local.id;
           const profile = agentProfileFor(publicId, local);
           const mappedAgent = Object.entries(OPENCLAW_AGENT_MAP).find(([, id]) => id === local.id)?.[1] || local.id;
           add({
