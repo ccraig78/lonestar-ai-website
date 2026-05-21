@@ -279,7 +279,7 @@ async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId, sentAt 
         message.recipient === inboxAgent &&
         message.id !== sinceMessageId &&
         (!sentAt || String(message.created_at || '') >= sentAt) &&
-        (/mission control/i.test(message.subject || '') || /mission control/i.test(message.body || ''))
+        /^Re: Mission Control message$/i.test(message.subject || '')
       ));
       if (looseReply) return { ...looseReply, matchedBy: 'recent' };
     } catch {
