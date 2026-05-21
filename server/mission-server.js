@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { URL } = require('url');
-const { execFile } = require('child_process');
+const { execFile, spawn } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const LOCAL_ENV_FILE = path.join(ROOT, '.env.mission.local');
@@ -38,12 +38,24 @@ const COOKIE_NAME = 'mission_session';
 const SESSION_TTL_MS = Number(process.env.MISSION_SESSION_TTL_MS || 1000 * 60 * 60 * 12);
 const OPENCLAW_ENABLED = process.env.MISSION_OPENCLAW_ENABLED === '1';
 const OPENCLAW_BIN = process.env.MISSION_OPENCLAW_BIN || '/home/clint-craig/.npm-global/bin/openclaw';
+const ACPX_BIN = process.env.MISSION_ACPX_BIN || '/home/clint-craig/.openclaw/npm/node_modules/.bin/acpx';
+const GROK_BIN = process.env.MISSION_GROK_BIN || '/home/clint-craig/.local/bin/grok';
+const AGENTBUS_SEND_BIN = process.env.MISSION_AGENTBUS_SEND_BIN || '/home/clint-craig/shared-workspace/agentbus/agentbus-send.py';
+const AGENTBUS_ENV_FILE = process.env.MISSION_AGENTBUS_ENV_FILE || '/etc/agentbus/Buddy.env';
 const OPENCLAW_AGENT_MAP = {
   buddy: process.env.MISSION_AGENT_BUDDY || 'main',
   stella: process.env.MISSION_AGENT_STELLA || 'lonestar',
   codi: process.env.MISSION_AGENT_CODI || '',
   euro: process.env.MISSION_AGENT_EURO || '',
   grok: process.env.MISSION_AGENT_GROK || ''
+};
+
+const AGENT_ROUTES = {
+  buddy: { type: 'openclaw', target: OPENCLAW_AGENT_MAP.buddy },
+  stella: { type: 'openclaw', target: OPENCLAW_AGENT_MAP.stella },
+  codi: { type: process.env.MISSION_CODI_ROUTE_TYPE || 'acpx', target: process.env.MISSION_CODI_ACPX_AGENT || 'codi' },
+  euro: { type: process.env.MISSION_EURO_ROUTE_TYPE || 'agentbus', target: process.env.MISSION_EURO_AGENTBUS_TO || 'Euro' },
+  grok: { type: process.env.MISSION_GROK_ROUTE_TYPE || 'grok', target: process.env.MISSION_GROK_TARGET || 'grok' }
 };
 
 const MIME = {
@@ -176,6 +188,74 @@ function execOpenClaw(args, options = {}) {
   });
 }
 
+function execFileText(command, args, options = {}) {
+  return new Promise((resolve) => {
+    execFile(command, args, {
+      cwd: options.cwd || ROOT,
+      timeout: options.timeout || 190000,
+      maxBuffer: options.maxBuffer || 1024 * 1024 * 4,
+      env: { ...process.env, ...(options.env || {}), PATH: `${path.dirname(command)}:${process.env.PATH || ''}` }
+    }, (err, stdout, stderr) => {
+      if (err) return resolve({ ok: false, stdout, stderr: stderr || err.message });
+      resolve({ ok: true, stdout, stderr });
+    });
+  });
+}
+
+function parseEnvFile(file) {
+  const env = {};
+  if (!fs.existsSync(file)) return env;
+  for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue;
+    const idx = trimmed.indexOf('=');
+    const key = trimmed.slice(0, idx).trim();
+    let value = trimmed.slice(idx + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
+    env[key] = value;
+  }
+  return env;
+}
+
+async function runAcpxAgent(agentId, message) {
+  const result = await execFileText(ACPX_BIN, ['--format', 'quiet', agentId, 'exec', message], { timeout: 300000 });
+  if (!result.ok) return { ok: false, text: `ACP call failed for ${agentId}: ${result.stderr}` };
+  return { ok: true, text: result.stdout.trim() || 'ACP agent returned no visible text.' };
+}
+
+async function runGrokAgent(message) {
+  const result = await execFileText(GROK_BIN, ['-z', message], { timeout: 300000 });
+  if (!result.ok) return { ok: false, text: `Grok call failed: ${result.stderr}` };
+  return { ok: true, text: result.stdout.trim() || 'Grok returned no visible text.' };
+}
+
+async function runAgentBusAgent(to, message) {
+  const env = parseEnvFile(AGENTBUS_ENV_FILE);
+  const subject = 'Mission Control message';
+  const result = await execFileText('python3', [AGENTBUS_SEND_BIN, '--to', to, '--subject', subject, '--body', message, '--priority', 'normal', '--kind', 'message'], {
+    timeout: 30000,
+    env
+  });
+  if (!result.ok) return { ok: false, text: `AgentBus send failed for ${to}: ${result.stderr}` };
+  try {
+    const data = JSON.parse(result.stdout);
+    const msg = data.message || {};
+    return { ok: true, text: `Sent to ${to} through AgentBus. Status: ${msg.status || 'sent'}. Message id: ${msg.id || 'unknown'}.` };
+  } catch {
+    return { ok: true, text: `Sent to ${to} through AgentBus.` };
+  }
+}
+
+async function runMissionAgent(publicId, message) {
+  const route = AGENT_ROUTES[publicId];
+  if (!route?.target) return { ok: false, text: `${publicId} is visible in Mission Control, but no route is configured yet.` };
+  if (route.type === 'openclaw') return runOpenClawAgent(route.target, message);
+  if (route.type === 'acpx') return runAcpxAgent(route.target, message);
+  if (route.type === 'grok') return runGrokAgent(message);
+  if (route.type === 'agentbus') return runAgentBusAgent(route.target, message);
+  return { ok: false, text: `Unknown Mission Control route type for ${publicId}: ${route.type}` };
+}
+
 function agentProfileFor(publicId, fallback = {}) {
   const profile = AGENT_PROFILES[publicId] || {};
   return {
@@ -193,15 +273,17 @@ async function discoverAgents() {
     byPublicId.set(agent.id, { ...(byPublicId.get(agent.id) || {}), ...agent });
   };
 
-  const configured = Object.entries(OPENCLAW_AGENT_MAP).filter(([, mapped]) => Boolean(mapped));
-  for (const [publicId, mappedAgent] of configured) {
+  const configured = Object.entries(AGENT_ROUTES).filter(([, route]) => Boolean(route?.target));
+  for (const [publicId, route] of configured) {
     const profile = agentProfileFor(publicId);
+    const isLive = route.type === 'openclaw' ? OPENCLAW_ENABLED : true;
     add({
       ...profile,
-      mappedAgent,
-      routable: OPENCLAW_ENABLED,
-      status: OPENCLAW_ENABLED ? 'Live' : 'Configured',
-      currentWork: OPENCLAW_ENABLED ? `Live via OpenClaw agent ${mappedAgent}` : `Configured as ${mappedAgent}; live routing is off`
+      mappedAgent: route.target,
+      routeType: route.type,
+      routable: isLive,
+      status: isLive ? 'Live' : 'Configured',
+      currentWork: isLive ? `Live via ${route.type} route ${route.target}` : `Configured as ${route.target}; live routing is off`
     });
   }
 
@@ -217,6 +299,7 @@ async function discoverAgents() {
           add({
             ...profile,
             mappedAgent,
+            routeType: 'openclaw',
             routable: OPENCLAW_ENABLED,
             status: OPENCLAW_ENABLED ? 'Live' : 'Available',
             model: local.model,
@@ -236,11 +319,10 @@ async function discoverAgents() {
       add({
         ...profile,
         mappedAgent: '',
+        routeType: '',
         routable: false,
-        status: publicId === 'grok' ? 'On demand' : 'Unmapped',
-        currentWork: publicId === 'grok'
-          ? 'Available through Codi/Hermes; direct Mission Control routing not configured yet'
-          : 'Visible here; direct Mission Control routing not configured yet'
+        status: 'Unmapped',
+        currentWork: 'Visible here; direct Mission Control routing not configured yet'
       });
     }
   }
@@ -323,7 +405,7 @@ async function handle(req, res) {
       openclaw: {
         enabled: OPENCLAW_ENABLED,
         binary: OPENCLAW_BIN,
-        wiredAgents: Object.fromEntries(Object.entries(OPENCLAW_AGENT_MAP).filter(([, value]) => Boolean(value)))
+        wiredAgents: Object.fromEntries(Object.entries(AGENT_ROUTES).filter(([, route]) => Boolean(route?.target)).map(([id, route]) => [id, route]))
       }
     });
   }
@@ -349,11 +431,11 @@ async function handle(req, res) {
       const agent = discoveredAgents.find(a => a.id === id) || { id, name: id };
       let replyText = 'Prototype backend received this command. Set MISSION_OPENCLAW_ENABLED=1 and configure agent mappings to send live OpenClaw turns.';
       const mappedAgent = agent.mappedAgent || OPENCLAW_AGENT_MAP[id];
-      if (OPENCLAW_ENABLED && mappedAgent) {
+      if (agent.routable !== false && mappedAgent) {
         const prompt = `Message from Clint via private LoneStar Mission Control. Reply for Mission Control, concise unless Clint asks for detail.\n\nClint says: ${text}`;
-        const result = await runOpenClawAgent(mappedAgent, prompt);
+        const result = await runMissionAgent(id, prompt);
         replyText = result.text;
-      } else if (OPENCLAW_ENABLED && !mappedAgent) {
+      } else if (!mappedAgent) {
         replyText = `${agent.name} is visible in Mission Control, but is not mapped to a local OpenClaw agent yet. Configure MISSION_AGENT_${id.toUpperCase()} to enable live routing.`;
       }
       replies.push({

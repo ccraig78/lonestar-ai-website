@@ -83,9 +83,11 @@ Current local live routing:
 
 - Buddy → OpenClaw agent `main`
 - Stella → OpenClaw agent `lonestar`
-- Codi / Euro / Grok stay visible in the UI, but return an unmapped notice until real OpenClaw agent ids are configured.
+- Codi → ACP/acpx alias `codi` (`hermes acp`)
+- Euro → AgentBus recipient `Euro` using `/etc/agentbus/Buddy.env`
+- Codi-Grok → local `grok -z` wrapper
 
-The server then runs `openclaw agent --agent <id> --message ... --json` from the backend. This keeps browser JavaScript free of OpenClaw tokens/secrets, but it does mean every live send can spend model tokens and may take several seconds.
+The server runs each route from the backend. This keeps browser JavaScript free of OpenClaw/Hermes/AgentBus tokens and local paths, but it does mean every live send can spend model tokens and may take several seconds. Euro’s AgentBus route is currently a doorbell/send route; it confirms delivery to AgentBus rather than waiting for a full Euro reply.
 
 ## Public access / security
 
