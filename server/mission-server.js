@@ -52,12 +52,21 @@ const OPENCLAW_AGENT_MAP = {
   grok: process.env.MISSION_AGENT_GROK || ''
 };
 
+function routeTarget(publicId, defaultType, defaultTarget) {
+  const upper = publicId.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+  const type = process.env[`MISSION_${upper}_ROUTE_TYPE`] || defaultType;
+  const target = type === 'agentbus'
+    ? (process.env[`MISSION_${upper}_AGENTBUS_TO`] || defaultTarget)
+    : (process.env[`MISSION_${upper}_TARGET`] || defaultTarget);
+  return { type, target };
+}
+
 const AGENT_ROUTES = {
-  buddy: { type: 'openclaw', target: OPENCLAW_AGENT_MAP.buddy },
-  stella: { type: 'openclaw', target: OPENCLAW_AGENT_MAP.stella },
-  codi: { type: process.env.MISSION_CODI_ROUTE_TYPE || 'acpx', target: process.env.MISSION_CODI_ACPX_AGENT || 'codi' },
-  euro: { type: process.env.MISSION_EURO_ROUTE_TYPE || 'agentbus', target: process.env.MISSION_EURO_AGENTBUS_TO || 'Euro' },
-  grok: { type: process.env.MISSION_GROK_ROUTE_TYPE || 'grok', target: process.env.MISSION_GROK_TARGET || 'grok' }
+  buddy: routeTarget('buddy', 'openclaw', OPENCLAW_AGENT_MAP.buddy),
+  stella: routeTarget('stella', 'openclaw', OPENCLAW_AGENT_MAP.stella),
+  codi: routeTarget('codi', process.env.MISSION_CODI_ROUTE_TYPE || 'acpx', process.env.MISSION_CODI_ACPX_AGENT || 'codi'),
+  euro: routeTarget('euro', process.env.MISSION_EURO_ROUTE_TYPE || 'agentbus', process.env.MISSION_EURO_AGENTBUS_TO || 'Euro'),
+  grok: routeTarget('grok', process.env.MISSION_GROK_ROUTE_TYPE || 'grok', process.env.MISSION_GROK_TARGET || 'grok')
 };
 
 const MIME = {
@@ -289,11 +298,22 @@ async function waitForAgentBusReply(threadId, fromAgent, sinceMessageId, sentAt 
   return null;
 }
 
-async function runAgentBusAgent(to, message) {
+function missionControlAgentBusBody(publicId, sender, threadId, message) {
+  const profile = AGENT_PROFILES[publicId] || {};
+  const targetName = profile.name || publicId;
+  const prefix = publicId === 'grok'
+    ? 'Codi, please answer this Mission Control request using Codi-Grok/Grok if available, then reply with Grok\'s answer.'
+    : publicId === 'stella'
+      ? 'Please answer in Stella/LoneStar website-control mode if you are able to route this request to Stella context.'
+      : `Please answer as ${targetName}.`;
+  return `${prefix}\n\n${message}\n\nMission Control request: please reply to ${sender} through AgentBus on this same thread ID: ${threadId}`;
+}
+
+async function runAgentBusAgent(to, message, publicId = '') {
   const env = parseEnvFile(AGENTBUS_ENV_FILE);
   const sender = env.AGENTBUS_AGENT || 'Buddy';
   const threadId = crypto.randomUUID();
-  const body = `${message}\n\nMission Control request: please reply to ${sender} through AgentBus on this same thread ID: ${threadId}`;
+  const body = missionControlAgentBusBody(publicId, sender, threadId, message);
   try {
     const data = await agentBusRequest('/api/messages', {
       method: 'POST',
@@ -326,7 +346,7 @@ async function runMissionAgent(publicId, message) {
   if (route.type === 'openclaw') return runOpenClawAgent(route.target, message);
   if (route.type === 'acpx') return runAcpxAgent(route.target, message);
   if (route.type === 'grok') return runGrokAgent(message);
-  if (route.type === 'agentbus') return runAgentBusAgent(route.target, message);
+  if (route.type === 'agentbus') return runAgentBusAgent(route.target, message, publicId);
   return { ok: false, text: `Unknown Mission Control route type for ${publicId}: ${route.type}` };
 }
 
